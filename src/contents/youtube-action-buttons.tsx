@@ -3,7 +3,7 @@
 import cssText from "data-text:~style.css";
 import { AlertCircle } from "lucide-react";
 import type { PlasmoCSConfig, PlasmoGetInlineAnchor } from "plasmo";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { ChatButton } from "~components/chat/ChatButton";
 import { QuizButton } from "~components/quiz/QuizButton";
@@ -13,7 +13,8 @@ import type { VideoContext } from "~types/transcript";
 
 // Only run on YouTube video pages
 export const config: PlasmoCSConfig = {
-  matches: ["https://www.youtube.com/watch*"]
+  matches: ["https://www.youtube.com/watch*"],
+  run_at: "document_idle"
 }
 
 export const getStyle = () => {
@@ -36,13 +37,18 @@ export const getInlineAnchor: PlasmoGetInlineAnchor = async () => {
     "#menu-container #top-level-buttons",
     ".ytd-menu-renderer #top-level-buttons-computed",
     "#actions #top-level-buttons-computed",
-    "#actions-inner #top-level-buttons-computed"
+    "#actions-inner #top-level-buttons-computed",
+    "ytd-menu-renderer #top-level-buttons",
+    "#top-row #menu #top-level-buttons-computed",
+    "ytd-video-primary-info-renderer #menu #top-level-buttons-computed",
+    "#primary-inner #menu-container #top-level-buttons",
+    "ytd-watch-flexy #menu #top-level-buttons-computed"
   ]
 
   // Try to find the button container with retries
   const findContainer = (): Promise<Element> => {
     return new Promise((resolve) => {
-      const maxAttempts = 20 // Try for ~10 seconds
+      const maxAttempts = 60 // Try for ~30 seconds
       let attempts = 0
 
       const checkForContainer = () => {
@@ -61,9 +67,18 @@ export const getInlineAnchor: PlasmoGetInlineAnchor = async () => {
         if (attempts < maxAttempts) {
           setTimeout(checkForContainer, 500)
         } else {
-          console.warn("⚠️ Could not find YouTube button container after retries")
-          // Fallback: return body so button still appears somewhere
-          resolve(document.body)
+          console.warn(
+            "⚠️ Could not find YouTube button container after 30 seconds"
+          )
+          console.log("📍 Using floating widget fallback position")
+
+          // Create a dedicated floating container
+          const fallbackContainer = document.createElement("div")
+          fallbackContainer.id = "nano-tutor-floating-buttons"
+          fallbackContainer.setAttribute("data-fallback-mode", "true")
+          document.body.appendChild(fallbackContainer)
+
+          resolve(fallbackContainer)
         }
       }
 
@@ -87,7 +102,26 @@ const YoutubeActionButtons = () => {
   const [error, setError] = useState<string | null>(null)
   const [showQuizModal, setShowQuizModal] = useState(false)
   const [isQuizLoading, setIsQuizLoading] = useState(false)
-  const [quizVideoContext, setQuizVideoContext] = useState<VideoContext | null>(null)
+  const [quizVideoContext, setQuizVideoContext] = useState<VideoContext | null>(
+    null
+  )
+  const [isFallbackMode, setIsFallbackMode] = useState(false)
+
+  // Detect if we're in fallback mode
+  useEffect(() => {
+    const checkFallbackMode = () => {
+      const shadowHost = document.getElementById(
+        "youtube-action-buttons-shadow-host"
+      )
+      const parent = shadowHost?.parentElement
+      if (parent?.getAttribute("data-fallback-mode") === "true") {
+        setIsFallbackMode(true)
+      }
+    }
+
+    // Check after a brief delay to ensure DOM is mounted
+    setTimeout(checkFallbackMode, 100)
+  }, [])
 
   const { getVideoContext } = useVideoContext()
 
@@ -117,7 +151,12 @@ const YoutubeActionButtons = () => {
   }
 
   return (
-    <div className="relative flex gap-2">
+    <div
+      className={
+        isFallbackMode
+          ? "fixed top-20 right-4 flex gap-2 bg-white dark:bg-gray-800 p-3 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-[9999]"
+          : "relative flex gap-2"
+      }>
       <ChatButton onError={setError} />
       <QuizButton onClick={handleQuizClick} isLoading={isQuizLoading} />
 
