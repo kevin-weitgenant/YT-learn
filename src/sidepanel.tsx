@@ -85,7 +85,7 @@ function SidePanel() {
     systemTokens
   } = useAISession({ 
     videoContext, 
-    shouldInitialize: availability === 'available',
+    shouldInitialize: availability === 'available' && !!videoContext?.transcript,
     setUsingRAG
   })
   
@@ -107,6 +107,7 @@ function SidePanel() {
   // Calculate derived state for ChatInput
   const isSessionReady = session !== null
   const hasUserMessages = messages.some(m => m.sender === "user")
+  const hasTranscriptError = !!videoContext?.error;
 
   const handleSend = async () => {
     if (!inputText.trim() || !isSessionReady) return
@@ -192,18 +193,25 @@ function SidePanel() {
     <div className="flex flex-col h-screen bg-gray-50">
       {/* Video Context Display */}
       {videoContext ? (
-        <div className="bg-blue-50 border-b border-blue-200 px-4 py-3">
-          <div className="flex items-start gap-2">
-            <span className="text-xl">💬</span>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-blue-900 text-sm truncate">
-                {videoContext.title}
-              </h3>
-              <p className="text-xs text-blue-700 truncate">
-                by {videoContext.channel}
-              </p>
+        <div>
+          <div className="bg-blue-50 border-b border-blue-200 px-4 py-3">
+            <div className="flex items-start gap-2">
+              <span className="text-xl">💬</span>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-blue-900 text-sm truncate">
+                  {videoContext.title}
+                </h3>
+                <p className="text-xs text-blue-700 truncate">
+                  by {videoContext.channel}
+                </p>
+              </div>
             </div>
           </div>
+          {videoContext.error && (
+            <div className="bg-red-50 border-b border-red-200 px-4 py-2 text-red-800 text-xs">
+              <p className="font-medium">Sorry, no available transcripts for this video.</p>
+            </div>
+          )}
         </div>
       ) : (
         <div className="bg-gray-100 border-b border-gray-200 px-4 py-3">
@@ -241,6 +249,7 @@ function SidePanel() {
           embeddingProgress={embeddingProgress}
           stopStreaming={stopStreaming}
           hasUserMessages={hasUserMessages}
+          hasTranscriptError={hasTranscriptError}
         />
       )}
     </div>

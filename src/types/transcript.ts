@@ -6,7 +6,7 @@ export interface VideoContext {
   /** The YouTube video ID */
   videoId: string
   /** The full transcript text from the YouTube video */
-  transcript: string
+  transcript?: string
   /** The title of the YouTube video */
   title: string
   /** The URL of the YouTube video */
@@ -15,6 +15,8 @@ export interface VideoContext {
   channel: string
   /** Timestamp when the context was created */
   timestamp: number
+  /** Optional error message if transcript extraction fails */
+  error?: string
 }
 
 /**

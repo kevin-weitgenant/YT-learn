@@ -139,11 +139,16 @@ export async function extractYouTubeContextHybrid(): Promise<VideoContext> {
       console.error('Fast method error:', fastError);
       console.error('DOM method error:', domError);
 
-      throw new Error(
-        `Failed to extract transcript using all available methods. ` +
-        `InnerTube API: ${(fastError as Error).message}. ` +
-        `DOM scraping: ${(domError as Error).message}`
-      );
+      // Instead of throwing, return a context object with an error message
+      const { title, url, channel } = getVideoMetadata();
+      return {
+        videoId,
+        title,
+        url,
+        channel,
+        timestamp: Date.now(),
+        error: `Failed to extract transcript using all available methods. InnerTube API: ${(fastError as Error).message}. DOM scraping: ${(domError as Error).message}`
+      };
     }
   }
 }

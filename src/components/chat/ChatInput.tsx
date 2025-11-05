@@ -18,6 +18,7 @@ interface ChatInputProps {
   embeddingProgress?: EmbeddingProgress
   stopStreaming: () => void
   hasUserMessages: boolean
+  hasTranscriptError: boolean
 }
 
 /**
@@ -36,7 +37,8 @@ export function ChatInput({
   isEmbedding,
   embeddingProgress,
   stopStreaming,
-  hasUserMessages
+  hasUserMessages,
+  hasTranscriptError
 }: ChatInputProps) {
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey && isSessionReady) {
@@ -81,13 +83,20 @@ Total: ${tokenInfo.totalTokens?.toLocaleString() || 0} / ${tokenInfo.inputQuota?
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder={isSessionReady ? "Ask anything about the video..." : "Preparing session..."}
-              className="flex-1 resize-none bg-transparent px-3 py-2.5 focus:outline-none placeholder:text-gray-400 text-gray-900"
+              placeholder={
+                hasTranscriptError 
+                  ? "Chat is unavailable for this video." 
+                  : isSessionReady 
+                    ? "Ask anything about the video..." 
+                    : "Preparing session..."
+              }
+              className="flex-1 resize-none bg-transparent px-3 py-2.5 focus:outline-none placeholder:text-gray-400 text-gray-900 disabled:bg-gray-50 disabled:cursor-not-allowed"
               rows={3}
+              disabled={hasTranscriptError || !isSessionReady}
             />
 
-            {/* Loading spinner while session is initializing */}
-            {!isSessionReady && !isStreaming && (
+            {/* Loading spinner while session is initializing (and no transcript error) */}
+            {!isSessionReady && !isStreaming && !hasTranscriptError && (
               <div className="flex-shrink-0 p-2.5 text-gray-400">
                 <Loader2 size={20} className="animate-spin" />
               </div>
