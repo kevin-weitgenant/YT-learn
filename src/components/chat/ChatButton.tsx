@@ -20,7 +20,7 @@ export const ChatButton = ({ onError }: ChatButtonProps) => {
     <button
       onClick={handleOpenChat}
       disabled={isLoading}
-      className="flex items-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+      className="flex items-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-full mr-[1rem] hover:bg-blue-700 transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
       title="Chat with the video">
       {isLoading ? (
         <>
