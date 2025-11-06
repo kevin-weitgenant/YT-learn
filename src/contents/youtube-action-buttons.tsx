@@ -9,7 +9,7 @@ import { ChatButton } from "~components/chat/ChatButton";
 
 // Only run on YouTube video pages
 export const config: PlasmoCSConfig = {
-  matches: ["https://www.youtube.com/watch*"],
+  matches: ["https://www.youtube.com/*"],
   run_at: "document_idle"
 }
 
