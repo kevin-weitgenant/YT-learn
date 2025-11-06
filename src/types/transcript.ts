@@ -17,6 +17,19 @@ export interface VideoContext {
   timestamp: number
   /** Optional error message if transcript extraction fails */
   error?: string
+  /** Video chapters/timestamps (empty array if none, undefined if extraction failed) */
+  chapters?: Chapter[]
+}
+
+/**
+ * Video Chapter Interface
+ * Represents a single chapter/timestamp in a YouTube video
+ */
+export interface Chapter {
+  /** Chapter title (e.g., "Introduction", "Main Content") */
+  title: string
+  /** Start time in seconds (e.g., 0, 83, 156) */
+  startSeconds: number
 }
 
 /**

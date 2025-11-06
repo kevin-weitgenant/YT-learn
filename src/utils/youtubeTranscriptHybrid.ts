@@ -11,6 +11,7 @@
 
 import { extractVideoId, extractYouTubeContext } from './youtubeTranscript';
 import { fetchFirstAvailableTranscript } from './youtubeTranscriptFast';
+import { extractChapters } from './youtubeChapters';
 import type { VideoContext } from '~types/transcript';
 
 /**
@@ -93,6 +94,9 @@ export async function extractYouTubeContextHybrid(): Promise<VideoContext> {
     // Get metadata from DOM (fast - no waiting)
     const { title, url, channel } = getVideoMetadata();
 
+    // Extract chapters (instant - from ytInitialData)
+    const chapters = extractChapters(videoId);
+
     const totalDuration = Date.now() - overallStart;
     console.log(`[Transcript] 🎉 Hybrid extraction completed in ${totalDuration}ms via FAST method`);
 
@@ -102,7 +106,8 @@ export async function extractYouTubeContextHybrid(): Promise<VideoContext> {
       title,
       url,
       channel,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      chapters
     };
 
   } catch (fastError) {
@@ -121,6 +126,9 @@ export async function extractYouTubeContextHybrid(): Promise<VideoContext> {
       // Use existing DOM scraping method
       const videoContext = await extractYouTubeContext();
 
+      // Extract chapters (instant - from ytInitialData)
+      const chapters = extractChapters(videoId);
+
       const fallbackDuration = Date.now() - fallbackStart;
       const totalDuration = Date.now() - overallStart;
 
@@ -129,7 +137,10 @@ export async function extractYouTubeContextHybrid(): Promise<VideoContext> {
         `(total: ${totalDuration}ms)`
       );
 
-      return videoContext;
+      return {
+        ...videoContext,
+        chapters
+      };
 
     } catch (domError) {
       // Both methods failed - give up
@@ -141,12 +152,17 @@ export async function extractYouTubeContextHybrid(): Promise<VideoContext> {
 
       // Instead of throwing, return a context object with an error message
       const { title, url, channel } = getVideoMetadata();
+
+      // Still try to extract chapters (they might be available even if transcript isn't)
+      const chapters = extractChapters(videoId);
+
       return {
         videoId,
         title,
         url,
         channel,
         timestamp: Date.now(),
+        chapters,
         error: `Failed to extract transcript using all available methods. InnerTube API: ${(fastError as Error).message}. DOM scraping: ${(domError as Error).message}`
       };
     }
