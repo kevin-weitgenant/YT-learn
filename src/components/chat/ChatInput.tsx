@@ -1,8 +1,6 @@
 import { Eraser, Loader2, Pause } from "lucide-react"
 import type { TokenInfo } from "../../hooks/useStreamingResponse"
 import type { LanguageModelSession } from "../../types/chrome-ai"
-import type { EmbeddingProgress } from "../../types/transcript"
-import { EmbeddingProgressBar } from "./EmbeddingProgressBar"
 import { CircularProgress } from "./CircularProgress"
 
 interface ChatInputProps {
@@ -14,8 +12,6 @@ interface ChatInputProps {
   tokenInfo: TokenInfo
   session: LanguageModelSession | null
   onReset: () => void
-  isEmbedding: boolean
-  embeddingProgress?: EmbeddingProgress
   stopStreaming: () => void
   hasUserMessages: boolean
   hasTranscriptError: boolean
@@ -34,8 +30,6 @@ export function ChatInput({
   tokenInfo,
   session,
   onReset,
-  isEmbedding,
-  embeddingProgress,
   stopStreaming,
   hasUserMessages,
   hasTranscriptError
@@ -49,13 +43,6 @@ export function ChatInput({
 
   return (
     <div className="bg-gradient-to-b from-white to-gray-50 border-t border-gray-200 px-6 py-5">
-      {/* Show embedding progress if embedding is in progress */}
-      {isEmbedding && embeddingProgress && (
-        <div className="mb-4">
-          <EmbeddingProgressBar progress={embeddingProgress} />
-        </div>
-      )}
-
       {/* Main input container */}
       <div className="max-w-4xl mx-auto">
         <div className="relative bg-white rounded-2xl shadow-lg shadow-gray-200/50 border border-gray-200 transition-all duration-200 hover:shadow-xl hover:shadow-gray-200/60 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-400">

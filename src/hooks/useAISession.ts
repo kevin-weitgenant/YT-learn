@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import type { LanguageModelSession } from "../types/chrome-ai"
 import type { Message } from "../types/message"
 import type { VideoContext } from "../types/transcript"
-import { AI_CONFIG, buildSystemPrompt, ERROR_MESSAGES } from "../utils/constants"
+import { AI_CONFIG, ERROR_MESSAGES } from "../utils/constants"
 import { decideRAGStrategy } from "../utils/ragDecision"
 
 interface UseAISessionProps {
@@ -99,7 +99,8 @@ export function useAISession({
     
     // Decide strategy based on context and append system prompt
     if (!context) {
-      systemPrompt = buildSystemPrompt()
+      systemPrompt =
+        "You are a helpful and friendly assistant."
       // Append system prompt to empty session
       await session.append([{ role: "system", content: systemPrompt }])
       setUsingRAG(false)
