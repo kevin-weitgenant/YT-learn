@@ -6,11 +6,11 @@
   "author": "kevin castro weitgenant (kevin.weitgenant@gmail.com)",
   "scripts": {
     "dev": "node scripts/dev-with-fix.js",
-    "dev:plain": "pnpm with-env plasmo dev",
-    "build": "pnpm with-env plasmo build",
-    "package": "pnpm with-env plasmo package",
-    "with-env": "dotenv -e .env --",
-    "postbuild": "node postbuild/fix-manifest.js"
+    "dev:plain": "plasmo dev",
+    "build": "plasmo build",
+    "package": "plasmo package",
+    "postbuild": "node postbuild/fix-manifest.js",
+    "clean": "rimraf build .plasmo"
   },
   "dependencies": {
     "@plasmohq/messaging": "^0.7.2",
@@ -33,9 +33,9 @@
     "@types/react": "18.2.48",
     "@types/react-dom": "18.2.18",
     "autoprefixer": "^10.4.16",
-    "dotenv-cli": "^7.4.2",
     "postcss": "^8.4.32",
     "prettier": "3.2.4",
+    "rimraf": "^5.0.7",
     "tailwindcss": "^3.3.7",
     "tsx": "^4.20.6",
     "typescript": "5.3.3"

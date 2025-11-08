@@ -26,7 +26,7 @@ const fixManifest = (manifestPath) => {
 }
 
 // Start the Plasmo dev server
-const devProcess = spawn("pnpm", ["with-env", "plasmo", "dev"], {
+const devProcess = spawn("pnpm", ["plasmo", "dev"], {
   stdio: "inherit",
   shell: true,
   cwd: path.join(__dirname, "..")
