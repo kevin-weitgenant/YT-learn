@@ -26,10 +26,8 @@ interface ChatStore {
   addMessage: (message: Message) => void
   updateLastMessage: (text: string) => void
 
-  // Setter for session-related state
-  setSessionState: (partialState: Partial<ChatStore>) => void
-
-  // Placeholder for async actions to be managed by useChatSession
+  // Placeholder for async actions to be managed by hooks
+  // These will be dynamically set by the hooks
   sendMessage: (text: string) => Promise<void>
   handleResetSession: () => Promise<void>
   stopStreaming: () => void
@@ -72,11 +70,9 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       }
     }),
   
-  setSessionState: (partialState) => set(partialState),
-
   // Async actions will be placeholders here and implemented in the hook
+  // They will be dynamically replaced by the hooks
   sendMessage: async (text: string) => {
-    // This will be overridden by the hook
     console.warn("sendMessage called before initialization")
   },
   handleResetSession: async () => {
