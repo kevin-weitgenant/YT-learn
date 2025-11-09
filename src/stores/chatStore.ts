@@ -19,12 +19,16 @@ interface ChatStore {
   apiAvailable: boolean | null
   session: LanguageModelSession | null
   usingRAG: boolean
+  isOpeningChat: boolean
+  openChatError: string | null
 
   // Actions
   setInputText: (text: string) => void
   setMessages: (messages: Message[]) => void
   addMessage: (message: Message) => void
   updateLastMessage: (text: string) => void
+  setIsOpeningChat: (isOpening: boolean) => void
+  setOpenChatError: (error: string | null) => void
 
   // Placeholder for async actions to be managed by hooks
   // These will be dynamically set by the hooks
@@ -55,6 +59,8 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   apiAvailable: null,
   session: null,
   usingRAG: false,
+  isOpeningChat: false,
+  openChatError: null,
 
   // Actions
   setInputText: (text) => set({ inputText: text }),
@@ -69,6 +75,8 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         messages: [...state.messages.slice(0, -1), updatedMessage]
       }
     }),
+  setIsOpeningChat: (isOpening) => set({ isOpeningChat: isOpening }),
+  setOpenChatError: (error) => set({ openChatError: error }),
   
   // Async actions will be placeholders here and implemented in the hook
   // They will be dynamically replaced by the hooks

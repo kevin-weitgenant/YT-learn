@@ -3,9 +3,9 @@
 import cssText from "data-text:~style.css";
 import { AlertCircle } from "lucide-react";
 import type { PlasmoCSConfig, PlasmoGetInlineAnchor } from "plasmo";
-import { useState, useEffect } from "react";
 
 import { ChatButton } from "~components/chat/ChatButton";
+import { useChatStore } from "~stores/chatStore";
 
 // Only run on YouTube video pages
 export const config: PlasmoCSConfig = {
@@ -19,8 +19,7 @@ export const getStyle = () => {
   return style
 }
 
-// Configure shadow DOM host ID for better debugging
-export const getShadowHostId = () => "youtube-action-buttons-shadow-host"
+
 
 /**
  * Find YouTube's button container and inject our buttons inline
@@ -39,18 +38,18 @@ export const getInlineAnchor: PlasmoGetInlineAnchor = async () => {
  * Renders Chat and Quiz buttons inline with YouTube's native buttons
  */
 const YoutubeActionButtons = () => {
-  const [error, setError] = useState<string | null>(null)
+  const openChatError = useChatStore((state) => state.openChatError)
 
   return (
     <div
       className={"relative flex gap-2"}>
-      <ChatButton onError={setError} />
+      <ChatButton />
 
       {/* Error notification - positioned below the buttons */}
-      {error && (
+      {openChatError && (
         <div className="absolute top-full left-0 mt-2 bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 max-w-sm whitespace-normal z-[10000]">
           <AlertCircle size={20} className="flex-shrink-0" />
-          <span className="text-sm">{error}</span>
+          <span className="text-sm">{openChatError}</span>
         </div>
       )}
     </div>

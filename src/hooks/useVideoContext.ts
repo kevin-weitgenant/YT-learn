@@ -3,10 +3,7 @@ import { storage, cleanupVideoStorage } from "~utils/storage";
 import type { VideoContext } from "~types/transcript";
 import { extractYouTubeContextHybrid } from "~utils/youtubeTranscriptHybrid";
 
-/**
- * Shared hook for extracting and caching YouTube video context
- * Used by both ChatButton and QuizButton to get video information
- */
+
 export const useVideoContext = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

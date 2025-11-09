@@ -1,19 +1,18 @@
-import { useState } from "react";
 import { sendToBackground } from "@plasmohq/messaging";
 import { useVideoContext } from "./useVideoContext";
+import { useChatStore } from "~stores/chatStore";
 
 /**
  * Hook for opening the chat side panel with video context
  * Handles opening the side panel and setting up the video context for the chat
  */
 export const useOpenChat = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const { getVideoContext } = useVideoContext();
+  const { setIsOpeningChat, setOpenChatError } = useChatStore();
 
   const handleOpenChat = async () => {
-    setIsLoading(true);
-    setError(null);
+    setIsOpeningChat(true);
+    setOpenChatError(null);
 
     try {
       // Open the side panel and get the tab ID
@@ -38,19 +37,17 @@ export const useOpenChat = () => {
         ? err.message
         : "Failed to extract transcript. Make sure the video has captions available.";
       
-      setError(errorMessage);
+      setOpenChatError(errorMessage);
       
       // Clear error after 5 seconds
-      setTimeout(() => setError(null), 5000);
+      setTimeout(() => setOpenChatError(null), 5000);
     } finally {
-      setIsLoading(false);
+      setIsOpeningChat(false);
     }
   };
 
   return {
-    handleOpenChat,
-    isLoading,
-    error
+    handleOpenChat
   };
 };
 

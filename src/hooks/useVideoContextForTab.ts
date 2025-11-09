@@ -6,21 +6,17 @@ import type { VideoContext } from "../types/transcript"
 import { useChapterStore } from "../stores/chapterStore"
 import { storage } from "../utils/storage"
 
-/**
- * Custom hook to manage video context based on the current active tab.
- * It handles:
- * 1. Detecting the current tab ID.
- * 2. Retrieving the associated video ID from session storage.
- * 3. Retrieving the video context (transcript, chapters, etc.) from persistent storage.
- * 4. Synchronizing video chapters with the global chapter store.
- *
- * @returns The video context for the current tab, or null if not available.
- */
+
+
+// This session storage instance is created once and reused across all hook instances.
+const sessionStorage = new Storage({ area: "session" })
+
+// Returns the VideoContext for the active tab, syncing chapters to global store.
 export function useVideoContextForTab(): VideoContext | null {
   const [currentTabId, setCurrentTabId] = useState<number | null>(null)
   const setChapters = useChapterStore((state) => state.setChapters)
 
-  // 1. Detect current tab ID
+  // Step 1: Detect the current active tab to get its ID.
   useEffect(() => {
     chrome.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
       if (tabs[0]?.id) {
@@ -29,25 +25,26 @@ export function useVideoContextForTab(): VideoContext | null {
     })
   }, [])
 
-  // 2. Get videoId from session storage (tab → videoId mapping)
-  const sessionStorage = new Storage({ area: "session" })
+  // Step 2: Use the tab ID to get the associated videoId from session storage.
+  // The key is the tab ID, and the value is the videoId.
   const [videoId] = useStorage<string>({
-    key: currentTabId?.toString() || null,
+    key: currentTabId?.toString(), // useStorage handles null keys gracefully
     instance: sessionStorage
   })
 
-  // 3. Read from video-centric key instead of tab-centric
+  // Step 3: Use the videoId to retrieve the complete VideoContext from persistent storage.
   const [videoContext] = useStorage<VideoContext>({
     key: videoId ? `videoContext_${videoId}` : null,
     instance: storage
   })
 
-  // 4. Initialize chapter store when videoContext changes
+  // Step 4: When videoContext is loaded or changed, update the global chapter store.
   useEffect(() => {
+    // We only update the store if there are chapters to prevent unnecessary re-renders.
     if (videoContext?.chapters && videoContext.chapters.length > 0) {
       setChapters(videoContext.chapters)
     }
-  }, [videoContext?.chapters, setChapters])
+  }, [videoContext, setChapters]) // Dependency on videoContext ensures this runs when data changes.
 
   return videoContext
 }
