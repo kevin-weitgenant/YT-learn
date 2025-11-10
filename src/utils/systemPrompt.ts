@@ -2,15 +2,10 @@ import type { LanguageModelSession } from "~types/chrome-ai"
 import type { VideoContext } from "~types/transcript"
 import { CHARS_PER_TOKEN, estimateTokens } from "./tokenEstimation"
 
-interface RAGDecisionResult {
-  systemPrompt: string
-  shouldUseRAG: boolean
-}
-
-export async function decideRAGStrategy(
+export async function createSystemPrompt(
   context: VideoContext,
   session: LanguageModelSession
-): Promise<RAGDecisionResult> {
+): Promise<string> {
   const inputQuota = session.inputQuota
   const transcriptTokens = estimateTokens(context.transcript)
   const threshold = Math.floor(inputQuota * 0.8)
@@ -30,6 +25,6 @@ export async function decideRAGStrategy(
 
   await session.append([{ role: "system", content: systemPrompt }])
 
-  return { systemPrompt, shouldUseRAG: false }
+  return systemPrompt
 }
 

@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react"
 import { Sparkles } from "lucide-react"
 import type { Concept, QuizQuestions } from "./quizSchema"
-import type { QuizData, QuizCompletion } from "~hooks/useQuizStorage"
+import type { QuizData, QuizCompletion } from "~hooks/quiz/useQuizStorage"
 import type { LanguageModelSession } from "~types/chrome-ai"
 import { QuizQuestion } from "./QuizQuestion"
 import { QuizResults } from "./QuizResults"
-import { useStreamingQuizGeneration } from "~hooks/useStreamingQuizGeneration"
+import { useStreamingQuizGeneration } from "~hooks/streaming/useStreamingQuizGeneration"
 
 interface QuizContentAreaProps {
   concept: Concept

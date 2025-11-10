@@ -1,7 +1,7 @@
 import { create } from "zustand"
 
 import type { Message } from "~types/message"
-import type { TokenInfo } from "~hooks/useStreamingResponse"
+import type { TokenInfo } from "~hooks/streaming/useStreamingResponse"
 import type { LanguageModelSession } from "~types/chrome-ai"
 
 interface ChatStore {
@@ -18,7 +18,6 @@ interface ChatStore {
   isExtracting: boolean
   apiAvailable: boolean | null
   session: LanguageModelSession | null
-  usingRAG: boolean
   isOpeningChat: boolean
   openChatError: string | null
 
@@ -58,7 +57,6 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   isExtracting: false,
   apiAvailable: null,
   session: null,
-  usingRAG: false,
   isOpeningChat: false,
   openChatError: null,
 

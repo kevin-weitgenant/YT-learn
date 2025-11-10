@@ -1,5 +1,5 @@
 import { sendToBackground } from "@plasmohq/messaging";
-import { useVideoContext } from "./useVideoContext";
+import { useVideoContext } from "./videoContext/useVideoContext";
 import { useChatStore } from "~stores/chatStore";
 
 /**

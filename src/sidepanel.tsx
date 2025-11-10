@@ -1,7 +1,7 @@
 import "~style.css"
 
-import { useVideoContextForTab } from "./hooks/useVideoContextForTab"
-import { useChatSession } from "./hooks/useChatSession"
+import { useVideoContextForTab } from "./hooks/videoContext/useVideoContextForTab"
+import { useChatSession } from "./hooks/chat/useChatSession"
 import { VideoContextHeader } from "./components/chat/VideoContextHeader"
 import { ChatArea } from "./components/chat/ChatArea"
 import { ChapterOverlay } from "./components/chat/chapter-panel/ChapterOverlay"

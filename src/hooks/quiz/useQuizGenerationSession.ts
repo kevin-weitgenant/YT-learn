@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
-import type { LanguageModelSession } from "../types/chrome-ai"
-import { QUIZ_GENERATOR_SYSTEM_PROMPT } from "../components/quiz/quizPrompts"
-import { AI_CONFIG } from "../utils/constants"
+import type { LanguageModelSession } from "../../types/chrome-ai"
+import { QUIZ_GENERATOR_SYSTEM_PROMPT } from "../../components/quiz/quizPrompts"
+import { AI_CONFIG } from "../../utils/constants"
 
 interface UseQuizGenerationSessionReturn {
   baseSession: LanguageModelSession | null

@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react"
 
-import type { VideoContext } from "../types/transcript"
+import type { VideoContext } from "../../types/transcript"
 import { useAISession } from "./useAISession"
 import { useModelAvailability } from "./useModelAvailability"
-import { useStreamingResponse } from "./useStreamingResponse"
-import { useChatStore } from "../stores/chatStore"
+import { useStreamingResponse } from "../streaming/useStreamingResponse"
+import { useChatStore } from "../../stores/chatStore"
 
 /**
  * Custom hook to unify AI session, streaming, and message management.
@@ -16,8 +16,6 @@ import { useChatStore } from "../stores/chatStore"
  * @param videoContext The video context to use for the session.
  */
 export function useChatSession(videoContext: VideoContext | null) {
-  const [usingRAG, setUsingRAG] = useState(false)
-  
   // Use separate selectors to avoid creating new object references
   const availability = useChatStore((state) => state.availability)
   const messages = useChatStore((state) => state.messages)
@@ -31,8 +29,7 @@ export function useChatSession(videoContext: VideoContext | null) {
   // 2. AI session management (updates store directly)
   useAISession({
     videoContext,
-    shouldInitialize: availability === "available" && !!transcript,
-    setUsingRAG
+    shouldInitialize: availability === "available" && !!transcript
   })
 
   // 3. Message streaming (updates store directly)
@@ -45,8 +42,7 @@ export function useChatSession(videoContext: VideoContext | null) {
 
     useChatStore.setState({
       hasUserMessages,
-      hasTranscriptError,
-      usingRAG
+      hasTranscriptError
     })
-  }, [videoContext, usingRAG, messages]) // depends on messages to re-calculate hasUserMessages
+  }, [videoContext, messages]) // depends on messages to re-calculate hasUserMessages
 }

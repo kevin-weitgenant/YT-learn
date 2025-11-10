@@ -4,8 +4,8 @@ import type { ConceptArray } from "./quizSchema"
 import { ConceptSidebar } from "./ConceptSidebar"
 import { QuizContentArea } from "./QuizContentArea"
 import { QuizNavigation } from "./QuizNavigation"
-import { useQuizGenerationSession } from "~hooks/useQuizGenerationSession"
-import { useQuizStorage, type QuizCompletion } from "~hooks/useQuizStorage"
+import { useQuizGenerationSession } from "~hooks/quiz/useQuizGenerationSession"
+import { useQuizStorage, type QuizCompletion } from "~hooks/quiz/useQuizStorage"
 
 interface QuizSessionPageProps {
   concepts: ConceptArray

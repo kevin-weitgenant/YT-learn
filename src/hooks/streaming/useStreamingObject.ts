@@ -2,7 +2,7 @@ import { useState, useRef } from "react"
 import { JSONParser } from "@streamparser/json-whatwg"
 import { zodToJsonSchema } from "zod-to-json-schema"
 import type { z, ZodSchema } from "zod"
-import type { LanguageModelSession } from "../types/chrome-ai"
+import type { LanguageModelSession } from "../../types/chrome-ai"
 
 interface UseStreamingObjectOptions<T> {
   schema: ZodSchema<T>

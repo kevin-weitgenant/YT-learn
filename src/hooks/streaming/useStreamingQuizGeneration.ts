@@ -1,10 +1,10 @@
 import { useState, useRef } from "react"
 import { JSONParser } from "@streamparser/json-whatwg"
 import { zodToJsonSchema } from "zod-to-json-schema"
-import type { LanguageModelSession } from "../types/chrome-ai"
-import type { Concept, QuizQuestions } from "../components/quiz/quizSchema"
-import { quizQuestionSchema } from "../components/quiz/quizSchema"
-import { generateQuizPrompt } from "../components/quiz/quizPrompts"
+import type { LanguageModelSession } from "../../types/chrome-ai"
+import type { Concept, QuizQuestions } from "../../components/quiz/quizSchema"
+import { quizQuestionSchema } from "../../components/quiz/quizSchema"
+import { generateQuizPrompt } from "../../components/quiz/quizPrompts"
 
 interface UseStreamingQuizGenerationOptions {
   baseSession: LanguageModelSession | null

@@ -2,9 +2,9 @@ import { useEffect, useState } from "react"
 import { Storage } from "@plasmohq/storage"
 import { useStorage } from "@plasmohq/storage/hook"
 
-import type { VideoContext } from "../types/transcript"
-import { useChapterStore } from "../stores/chapterStore"
-import { storage } from "../utils/storage"
+import type { VideoContext } from "../../types/transcript"
+import { useChapterStore } from "../../stores/chapterStore"
+import { storage } from "../../utils/storage"
 
 
 

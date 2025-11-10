@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
-import type { LanguageModelSession } from "../types/chrome-ai"
-import type { VideoContext } from "../types/transcript"
-import { AI_CONFIG } from "../utils/constants"
+import type { LanguageModelSession } from "../../types/chrome-ai"
+import type { VideoContext } from "../../types/transcript"
+import { AI_CONFIG } from "../../utils/constants"
 
 interface UseQuizSessionProps {
   videoContext: VideoContext | null

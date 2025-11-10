@@ -1,15 +1,14 @@
 import { useEffect } from "react"
-import type { LanguageModelSession } from "../types/chrome-ai"
-import type { Message } from "../types/message"
-import type { VideoContext } from "../types/transcript"
-import { useChatStore } from "../stores/chatStore"
-import { AI_CONFIG, ERROR_MESSAGES } from "../utils/constants"
-import { decideRAGStrategy } from "../utils/ragDecision"
+import type { LanguageModelSession } from "../../types/chrome-ai"
+import type { Message } from "../../types/message"
+import type { VideoContext } from "../../types/transcript"
+import { useChatStore } from "../../stores/chatStore"
+import { AI_CONFIG, ERROR_MESSAGES } from "../../utils/constants"
+import { createSystemPrompt } from "../../utils/systemPrompt"
 
 interface UseAISessionProps {
   videoContext: VideoContext | null
   shouldInitialize: boolean
-  setUsingRAG: (using: boolean) => void
 }
 
 /**
@@ -20,8 +19,7 @@ interface UseAISessionProps {
  */
 export function useAISession({
   videoContext,
-  shouldInitialize,
-  setUsingRAG
+  shouldInitialize
 }: UseAISessionProps) {
   // Helper function to create a new session with dynamic system prompt
   const createSession = async (
@@ -45,13 +43,9 @@ export function useAISession({
       systemPrompt = "You are a helpful and friendly assistant."
       // Append system prompt to empty session
       await session.append([{ role: "system", content: systemPrompt }])
-      setUsingRAG(false)
     } else {
-      // decideRAGStrategy will append the system prompt internally
-      const { systemPrompt: ragPrompt, shouldUseRAG } =
-        await decideRAGStrategy(context, session)
-      systemPrompt = ragPrompt
-      setUsingRAG(shouldUseRAG)
+      // createSystemPrompt will append the system prompt internally
+      systemPrompt = await createSystemPrompt(context, session)
     }
 
     console.log(

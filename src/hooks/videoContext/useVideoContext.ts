@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { storage, cleanupVideoStorage } from "~utils/storage";
 import type { VideoContext } from "~types/transcript";
-import { extractYouTubeContextHybrid } from "~utils/youtubeTranscriptHybrid";
+import { extractYouTubeContextHybrid } from "~utils/yt_extraction/youtubeTranscriptHybrid";
 
 
 export const useVideoContext = () => {

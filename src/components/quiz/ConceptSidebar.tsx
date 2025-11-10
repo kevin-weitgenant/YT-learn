@@ -1,6 +1,6 @@
 import { Check, ChevronRight, X } from "lucide-react"
 import type { Concept } from "./quizSchema"
-import type { QuizCompletion } from "~hooks/useQuizStorage"
+import type { QuizCompletion } from "~hooks/quiz/useQuizStorage"
 
 interface ConceptSidebarProps {
   concepts: Concept[]

@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react"
-import type { LanguageModelSession } from "../types/chrome-ai"
-import type { Message } from "../types/message"
-import { useChatStore } from "../stores/chatStore"
-import { ERROR_MESSAGES } from "../utils/constants"
+import type { LanguageModelSession } from "../../types/chrome-ai"
+import type { Message } from "../../types/message"
+import { useChatStore } from "../../stores/chatStore"
+import { ERROR_MESSAGES } from "../../utils/constants"
 
 export interface TokenInfo {
   systemTokens: number // System message tokens
@@ -80,7 +80,7 @@ export function useStreamingResponse() {
     text: string,
     options?: {
       displayText?: string
-      chunks?: import("../types/transcript").TranscriptChunk[]
+      chunks?: import("../../types/transcript").TranscriptChunk[]
     }
   ) => {
     const { session, isStreaming, addMessage } = useChatStore.getState()

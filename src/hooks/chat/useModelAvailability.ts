@@ -1,6 +1,6 @@
 import { useEffect } from "react"
-import type { LanguageModelSession } from "../types/chrome-ai"
-import { useChatStore } from "../stores/chatStore"
+import type { LanguageModelSession } from "../../types/chrome-ai"
+import { useChatStore } from "../../stores/chatStore"
 
 /**
  * Custom hook to manage model availability and download progress.
