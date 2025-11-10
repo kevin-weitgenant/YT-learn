@@ -1,18 +1,15 @@
 import { Loader2 } from "lucide-react"
-import type { VideoContext } from "../../types/transcript"
-
-interface VideoContextHeaderProps {
-  videoContext: VideoContext | null
-}
+import { useVideoContextForTab } from "../../hooks/useVideoContextForTab"
 
 /**
  * A component that displays the video context header.
  * It shows the video title and channel, or a loading state if the context is not yet available.
  * It also displays an error message if there are no available transcripts for the video.
  *
- * @param videoContext The video context to display.
  */
-export function VideoContextHeader({ videoContext }: VideoContextHeaderProps) {
+export function VideoContextHeader() {
+  const videoContext = useVideoContextForTab()
+
   return videoContext ? (
     <div>
       <div className="bg-blue-50 border-b border-blue-200 px-4 py-3">

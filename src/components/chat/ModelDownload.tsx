@@ -1,29 +1,37 @@
-interface ModelDownloadProps {
-  availability: 'downloadable' | 'downloading' | 'unavailable' | null
-  downloadProgress: number
-  isExtracting: boolean
-  onStartDownload: () => void
-}
+import { useChatStore } from "../../stores/chatStore"
 
 /**
  * Component that replaces ChatInput when model needs to be downloaded.
  * Shows download button, progress bar, and status messages.
  */
-export function ModelDownload({
-  availability,
-  downloadProgress,
-  isExtracting,
-  onStartDownload
-}: ModelDownloadProps) {
+export function ModelDownload() {
+  const { availability, downloadProgress, isExtracting, startDownload } =
+    useChatStore()
   // API not available at all
-  if (availability === 'unavailable') {
+  if (availability === "unavailable") {
     return (
       <div className="border-t border-gray-200 bg-white p-4">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-sm text-red-800 font-medium">⚠️ AI Model Not Available</p>
-          <p className="text-xs text-red-600 mt-1">
-            Please ensure you're using Chrome 138+ with Chrome AI enabled in chrome://flags/#optimization-guide-on-device-model
-          </p>
+          <div className="text-xs text-red-600 mt-2 space-y-1">
+            <p>Your browser or device may not support the built-in AI model. Please ensure you meet the following requirements:</p>
+            <ul className="list-disc list-inside pl-2 space-y-1">
+              <li>A recent version of Google Chrome for desktop.</li>
+              <li>At least 22 GB of free disk space.</li>
+              <li>
+                The following flag is enabled: <br />
+                <a href="chrome://flags/#prompt-api-for-gemini-nano-multimodal-input" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                  chrome://flags/#prompt-api-for-gemini-nano-multimodal-input
+                </a>
+              </li>
+            </ul>
+            <p>
+              For more information, please refer to the{" "}
+              <a href="https://developer.chrome.com/docs/ai/get-started" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                official Chrome AI documentation
+              </a>.
+            </p>
+          </div>
         </div>
       </div>
     )
@@ -41,7 +49,7 @@ export function ModelDownload({
             </p>
           </div>
           <button
-            onClick={onStartDownload}
+            onClick={startDownload}
             className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
             Download AI Model
           </button>

@@ -1,3 +1,4 @@
+import { Minimize2 } from "lucide-react"
 import { useChapterStore } from "~stores/chapterStore"
 
 export function ChapterSelectionPanel() {
@@ -6,14 +7,15 @@ export function ChapterSelectionPanel() {
   const selectedChapters = useChapterStore((state) => state.selectedChapters)
   const rangeInput = useChapterStore((state) => state.rangeInput)
   const toggleChapter = useChapterStore((state) => state.toggleChapter)
+  const togglePanel = useChapterStore((state) => state.togglePanel)
   const selectAll = useChapterStore((state) => state.selectAll)
   const deselectAll = useChapterStore((state) => state.deselectAll)
   const setRangeInput = useChapterStore((state) => state.setRangeInput)
   const applyRange = useChapterStore((state) => state.applyRange)
-  const handleRangeKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      applyRange()
-    }
+  const handleRangeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value
+    setRangeInput(newValue)
+    applyRange(newValue)
   }
 
   return (
@@ -23,6 +25,12 @@ export function ChapterSelectionPanel() {
           <h2 className="text-base font-semibold text-gray-800">
             Select Context
           </h2>
+          <button
+            onClick={togglePanel}
+            className="p-1 rounded-md hover:bg-gray-200 transition-colors"
+            title="Minimize">
+            <Minimize2 size={16} />
+          </button>
         </div>
 
         <div className="grid grid-cols-2 gap-2 mb-2">
@@ -46,8 +54,7 @@ export function ChapterSelectionPanel() {
           <input
             id="chapter-range"
             value={rangeInput}
-            onChange={e => setRangeInput(e.target.value)}
-            onKeyDown={handleRangeKeyDown}
+            onChange={handleRangeChange}
             placeholder="1-3,5-8"
             className="mb-2 bg-white text-gray-800 border-gray-200 text-xs h-7 w-full rounded-md px-2 focus:border-blue-400 focus:ring-1 focus:ring-blue-400 focus:outline-none"
           />

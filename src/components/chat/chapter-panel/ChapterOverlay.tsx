@@ -1,4 +1,4 @@
-import { useChapterStore } from "../../stores/chapterStore"
+import { useChapterStore } from "../../../stores/chapterStore"
 import { ChapterSelectionPanel } from "./ChapterSelectionPanel"
 
 /**

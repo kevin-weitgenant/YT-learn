@@ -1,6 +1,8 @@
 import { Eraser, Loader2, Pause } from "lucide-react"
 import { useChatStore } from "../../stores/chatStore"
 import { CircularProgress } from "./CircularProgress"
+import { ChapterSelectionHeader } from "./ChapterSelectionHeader"
+import { useChapterStore } from "../../stores/chapterStore"
 
 /**
  * Input area component with textarea and send button
@@ -19,6 +21,7 @@ export function ChatInput() {
     hasUserMessages,
     hasTranscriptError
   } = useChatStore()
+  const chapters = useChapterStore((state) => state.chapters)
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey && isSessionReady) {
@@ -38,6 +41,11 @@ export function ChatInput() {
       {/* Main input container */}
       <div className="max-w-4xl mx-auto">
         <div className="relative bg-white rounded-2xl shadow-lg shadow-gray-200/50 border border-gray-200 transition-all duration-200 hover:shadow-xl hover:shadow-gray-200/60 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-400">
+          {chapters && chapters.length > 0 && (
+            <div className="">
+              <ChapterSelectionHeader variant="compact" />
+            </div>
+          )}
           <div className="flex items-end gap-2 p-2">
             {/* Reset button with circular progress - only show when user has sent messages */}
             {hasUserMessages && (

@@ -19,7 +19,7 @@ interface ChapterStore {
   selectAll: () => void
   deselectAll: () => void
   setRangeInput: (value: string) => void
-  applyRange: () => void
+  applyRange: (range?: string) => void
   reset: () => void
 }
 
@@ -67,10 +67,11 @@ export const useChapterStore = create<ChapterStore>((set, get) => ({
 
   setRangeInput: (value: string) => set({ rangeInput: value }),
 
-  applyRange: () =>
+  applyRange: (rangeValue?: string) =>
     set((state) => {
+      const rangeToUse = rangeValue !== undefined ? rangeValue : state.rangeInput
       const selected = new Set<number>()
-      const ranges = state.rangeInput.split(",")
+      const ranges = rangeToUse.split(",")
       const totalChapters = state.chapters.length
 
       ranges.forEach((range) => {

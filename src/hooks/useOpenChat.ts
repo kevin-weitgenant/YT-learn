@@ -26,11 +26,16 @@ export const useOpenChat = () => {
       // Get video context (with caching)
       const videoContext = await getVideoContext();
 
-      // Set video for tab (session storage mapping)
+      // Set video for tab. So the sidepanel can read the video context from the local storage.
+      // And properly work for different tabs
       await sendToBackground({
         name: "setVideoForTab",
         body: { videoId: videoContext.videoId }
       });
+
+
+
+
     } catch (err) {
       console.error("Failed to extract video context:", err);
       const errorMessage = err instanceof Error
