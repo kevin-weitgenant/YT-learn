@@ -1,11 +1,12 @@
 import { useChatStore } from "../../../stores/chatStore"
+import { useModelAvailability } from "../../../hooks/chat/useModelAvailability"
 
 /**
 Shows if the model is unavailable, downloadable, downloading, or extracting.
  */
 export function ModelDownload() {
-  const { availability, downloadProgress, isExtracting, startDownload } =
-    useChatStore()
+  const { availability, downloadProgress, isExtracting } = useChatStore()
+  const { startDownload } = useModelAvailability()
   // API not available at all
   if (availability === "unavailable") {
     return (

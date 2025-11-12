@@ -1,5 +1,7 @@
 import { Eraser, Loader2, Pause } from "lucide-react"
 import { useChatStore } from "../../stores/chatStore"
+import { useStreamingResponse } from "../../hooks/chat/useStreamingResponse"
+import { useAISession } from "../../hooks/chat/useAISession"
 import { CircularProgress } from "./ui/CircularProgress"
 import { ChapterSelectionHeader } from "./chapters/ChapterSelectionHeader"
 import { useChapterStore } from "../../stores/chapterStore"
@@ -10,17 +12,18 @@ import { useChapterStore } from "../../stores/chapterStore"
  */
 export function ChatInput() {
   const {
+    videoContext,
+    session,
     inputText,
     setInputText,
-    sendMessage,
     isStreaming,
     isSessionReady,
     tokenInfo,
-    handleResetSession,
-    stopStreaming,
     hasUserMessages,
     hasTranscriptError
   } = useChatStore()
+  const { resetSession } = useAISession({ videoContext, shouldInitialize: false })
+  const { sendMessage, stopStreaming } = useStreamingResponse(session)
   const chapters = useChapterStore((state) => state.chapters)
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -51,7 +54,7 @@ export function ChatInput() {
                   size={40}
                   strokeWidth={2}>
                   <button
-                    onClick={handleResetSession}
+                    onClick={resetSession}
                     disabled={!isSessionReady}
                     title={`Context Window Usage:
 System: ${tokenInfo.systemTokens?.toLocaleString() || 0} tokens

@@ -80,9 +80,7 @@ export function useModelAvailability() {
     }
   }
 
-  // Set the action in the store so components can call it
-  useEffect(() => {
-    useChatStore.setState({ startDownload })
-  }, [])
+  // Return function for components to use
+  return { startDownload }
 }
 

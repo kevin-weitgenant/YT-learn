@@ -11,7 +11,8 @@ export function useChatSession(videoContext: VideoContext | null) {
   // Use separate selectors to avoid creating new object references
   const availability = useChatStore((state) => state.availability)
   const messages = useChatStore((state) => state.messages)
-  
+  const session = useChatStore((state) => state.session)
+
   // transcript comes from videoContext, not store
   const transcript = videoContext?.transcript
 
@@ -24,8 +25,8 @@ export function useChatSession(videoContext: VideoContext | null) {
     shouldInitialize: availability === "available" && !!transcript
   })
 
-  // 3. Message streaming (updates store directly)
-  useStreamingResponse()
+  // 3. Message streaming (pass session)
+  useStreamingResponse(session)
 
   // 4. Update derived state in the store
   useEffect(() => {

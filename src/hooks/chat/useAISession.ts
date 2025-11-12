@@ -158,8 +158,6 @@ export function useAISession({
     }
   }
 
-  // Set the action in the store so components can call it
-  useEffect(() => {
-    useChatStore.setState({ handleResetSession: resetSession })
-  }, [videoContext])
+  // Return function for components to use
+  return { resetSession }
 }

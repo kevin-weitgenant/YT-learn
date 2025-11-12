@@ -4,6 +4,7 @@ import { useStorage } from "@plasmohq/storage/hook"
 
 import type { VideoContext } from "../../types/transcript"
 import { useChapterStore } from "../../stores/chapterStore"
+import { useChatStore } from "../../stores/chatStore"
 import { storage } from "../../utils/storage"
 
 
@@ -45,6 +46,11 @@ export function useVideoContextForTab(): VideoContext | null {
       setChapters(videoContext.chapters)
     }
   }, [videoContext, setChapters]) // Dependency on videoContext ensures this runs when data changes.
+
+  // Step 5: Sync videoContext to chatStore for easy access by components
+  useEffect(() => {
+    useChatStore.setState({ videoContext })
+  }, [videoContext])
 
   return videoContext
 }

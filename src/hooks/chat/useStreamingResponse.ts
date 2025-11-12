@@ -16,7 +16,7 @@ export interface TokenInfo {
  * Custom hook to handle streaming AI responses
  * Manages message streaming state and updates messages in real-time
  */
-export function useStreamingResponse() {
+export function useStreamingResponse(session: LanguageModelSession | null) {
   const streamingMessageRef = useRef<string>("")
   const streamingMessageIdRef = useRef<number | null>(null)
   const lastUpdateTimeRef = useRef<number>(0)
@@ -82,7 +82,7 @@ export function useStreamingResponse() {
       displayText?: string
     }
   ) => {
-    const { session, isStreaming, addMessage } = useChatStore.getState()
+    const { isStreaming, addMessage } = useChatStore.getState()
     if (!text.trim() || isStreaming || !session) return
 
     console.log("📤 [BEFORE SENDING MESSAGE]")
@@ -189,12 +189,7 @@ export function useStreamingResponse() {
     }
   }
 
-  // Set actions in the store so components can call them
-  useEffect(() => {
-    useChatStore.setState({
-      sendMessage,
-      stopStreaming
-    })
-  }, [])
+  // Return functions for components to use
+  return { sendMessage, stopStreaming }
 }
 

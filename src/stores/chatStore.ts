@@ -3,9 +3,11 @@ import { create } from "zustand"
 import type { Message } from "~types/message"
 import type { TokenInfo } from "~hooks/chat/useStreamingResponse"
 import type { LanguageModelSession } from "~types/chrome-ai"
+import type { VideoContext } from "~types/transcript"
 
 interface ChatStore {
   // State
+  videoContext: VideoContext | null
   messages: Message[]
   inputText: string
   isStreaming: boolean
@@ -22,23 +24,18 @@ interface ChatStore {
   openChatError: string | null
 
   // Actions
+  setVideoContext: (context: VideoContext | null) => void
   setInputText: (text: string) => void
   setMessages: (messages: Message[]) => void
   addMessage: (message: Message) => void
   updateLastMessage: (text: string) => void
   setIsOpeningChat: (isOpening: boolean) => void
   setOpenChatError: (error: string | null) => void
-
-  // Placeholder for async actions to be managed by hooks
-  // These will be dynamically set by the hooks
-  sendMessage: (text: string) => Promise<void>
-  handleResetSession: () => Promise<void>
-  stopStreaming: () => void
-  startDownload: () => Promise<void>
 }
 
 export const useChatStore = create<ChatStore>((set, get) => ({
   // Initial state
+  videoContext: null,
   messages: [],
   inputText: "",
   isStreaming: false,
@@ -61,6 +58,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   openChatError: null,
 
   // Actions
+  setVideoContext: (context) => set({ videoContext: context }),
   setInputText: (text) => set({ inputText: text }),
   setMessages: (messages) => set({ messages }),
   addMessage: (message) => set((state) => ({ messages: [...state.messages, message] })),
@@ -75,19 +73,4 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     }),
   setIsOpeningChat: (isOpening) => set({ isOpeningChat: isOpening }),
   setOpenChatError: (error) => set({ openChatError: error }),
-  
-  // Async actions will be placeholders here and implemented in the hook
-  // They will be dynamically replaced by the hooks
-  sendMessage: async (text: string) => {
-    console.warn("sendMessage called before initialization")
-  },
-  handleResetSession: async () => {
-    console.warn("handleResetSession called before initialization")
-  },
-  stopStreaming: () => {
-    console.warn("stopStreaming called before initialization")
-  },
-  startDownload: async () => {
-    console.warn("startDownload called before initialization")
-  },
 }))
