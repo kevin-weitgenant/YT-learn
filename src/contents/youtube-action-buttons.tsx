@@ -4,7 +4,7 @@ import cssText from "data-text:~style.css";
 import { AlertCircle } from "lucide-react";
 import type { PlasmoCSConfig, PlasmoGetInlineAnchor } from "plasmo";
 
-import { ChatButton } from "~components/chat/ChatButton";
+import { ChatButton } from "~components/chat/ui/ChatButton";
 import { useChatStore } from "~stores/chatStore";
 
 // Only run on YouTube video pages

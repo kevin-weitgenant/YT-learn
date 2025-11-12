@@ -1,4 +1,4 @@
-import type { Message } from "../../types/message"
+import type { Message } from "../../../types/message"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 

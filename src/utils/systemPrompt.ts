@@ -2,6 +2,9 @@ import type { LanguageModelSession } from "~types/chrome-ai"
 import type { VideoContext } from "~types/transcript"
 import { CHARS_PER_TOKEN, estimateTokens } from "./tokenEstimation"
 
+
+
+//create system prompt for the chat, truncates the transcript if it's too long.
 export async function createSystemPrompt(
   context: VideoContext,
   session: LanguageModelSession

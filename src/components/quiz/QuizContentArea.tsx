@@ -5,7 +5,7 @@ import type { QuizData, QuizCompletion } from "~hooks/quiz/useQuizStorage"
 import type { LanguageModelSession } from "~types/chrome-ai"
 import { QuizQuestion } from "./QuizQuestion"
 import { QuizResults } from "./QuizResults"
-import { useStreamingQuizGeneration } from "~hooks/streaming/useStreamingQuizGeneration"
+import { useStreamingQuizGeneration } from "~hooks/streaming-object/useStreamingQuizGeneration"
 
 interface QuizContentAreaProps {
   concept: Concept

@@ -1,5 +1,5 @@
-import { useChatStore } from "../../stores/chatStore"
-import type { Message } from "../../types/message"
+import { useChatStore } from "../../../stores/chatStore"
+import type { Message } from "../../../types/message"
 import { MessageItem } from "./MessageItem"
 
 /**

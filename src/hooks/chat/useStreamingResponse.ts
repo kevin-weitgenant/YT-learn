@@ -80,7 +80,6 @@ export function useStreamingResponse() {
     text: string,
     options?: {
       displayText?: string
-      chunks?: import("../../types/transcript").TranscriptChunk[]
     }
   ) => {
     const { session, isStreaming, addMessage } = useChatStore.getState()
@@ -94,8 +93,7 @@ export function useStreamingResponse() {
     const userMessage: Message = {
       id: Date.now(),
       text: options?.displayText ?? text,
-      sender: "user",
-      retrievedChunks: options?.chunks
+      sender: "user"
     }
     addMessage(userMessage)
 

@@ -1,5 +1,54 @@
 # NanoTutor Architecture Flow
 
+## Architecture Visualization
+
+```mermaid
+graph TD
+    subgraph "1. Content Script Injection"
+        A[YouTube Video Page]
+        ContentScript("youtube-action-buttons.tsx") --"Injects 'Chat' button"--> A
+    end
+
+    A --"User Clicks 'Chat'"--> OpenChatHook("hooks/useOpenChat.ts")
+
+    subgraph "2. Opening Chat Flow"
+        OpenChatHook --"1. openSidePanel"--> BackgroundScript((Background Script))
+        BackgroundScript --"tabId"--> OpenChatHook
+        OpenChatHook --"2. useVideoContext()"--> VideoContextHook("hooks/useVideoContext.ts")
+        VideoContextHook --"Video Context"--> OpenChatHook
+        OpenChatHook --"3. setVideoForTab"--> SetVideoForTab("background/messages/setVideoForTab.ts")
+        SetVideoForTab --"tabId → videoId"--> SessionStorage[(Session Storage)]
+    end
+
+    subgraph "3. Video Context Extraction"
+        VideoContextHook --> CacheCheck{Cache Check in<br>chrome.storage.local}
+        CacheCheck --"✅ Hit"--> VideoContextHook
+        CacheCheck --"❌ Miss"--> HybridExtraction("extractYouTubeContextHybrid()")
+        
+        subgraph "3.1 Hybrid Extraction Method"
+            HybridExtraction --> TranscriptExtraction("A) Transcript Extraction")
+            HybridExtraction --> ChapterExtraction("B) Chapter Extraction")
+
+            subgraph "Transcript Logic (youtubeTranscript.ts)"
+                TranscriptExtraction --> InnerTubeAPI["InnerTube API (Fast)"]
+                InnerTubeAPI --"Success (95%)"--> TranscriptData([Transcript])
+                InnerTubeAPI --"Fail"--> DOMScraping["DOM Scraping (Fallback)"]
+                DOMScraping --> TranscriptData
+            end
+
+            subgraph "Chapter Logic (youtubeChapters.ts)"
+                 ChapterExtraction --"Reads"--> ytInitialDataObject(window.ytInitialData)
+                 ytInitialDataObject --> ChapterData([Chapters])
+            end
+        end
+        
+        TranscriptData & ChapterData --> CombinedContext(VideoContext Object)
+        CombinedContext --> StoreInCache["Store Context and cleanupVideoStorage()"]
+        StoreInCache --> LocalStorage[(chrome.storage.local)]
+        StoreInCache --> VideoContextHook
+    end
+```
+
 ## 1. Content Script Injection
 **File:** `youtube-action-buttons.tsx`
 

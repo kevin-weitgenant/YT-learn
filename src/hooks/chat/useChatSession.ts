@@ -3,18 +3,10 @@ import { useEffect, useState } from "react"
 import type { VideoContext } from "../../types/transcript"
 import { useAISession } from "./useAISession"
 import { useModelAvailability } from "./useModelAvailability"
-import { useStreamingResponse } from "../streaming/useStreamingResponse"
+import { useStreamingResponse } from "./useStreamingResponse"
 import { useChatStore } from "../../stores/chatStore"
 
-/**
- * Custom hook to unify AI session, streaming, and message management.
- * This hook orchestrates the following hooks, which manage their state in Zustand:
- * - `useModelAvailability`: To check if the model is available and handle downloads.
- * - `useAISession`: To manage the AI session initialization and cleanup.
- * - `useStreamingResponse`: To handle streaming AI responses.
- *
- * @param videoContext The video context to use for the session.
- */
+
 export function useChatSession(videoContext: VideoContext | null) {
   // Use separate selectors to avoid creating new object references
   const availability = useChatStore((state) => state.availability)

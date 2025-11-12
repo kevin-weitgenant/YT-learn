@@ -1,5 +1,5 @@
 import { Loader2 } from "lucide-react"
-import { useVideoContextForTab } from "../../hooks/videoContext/useVideoContextForTab"
+import { useVideoContextForTab } from "../../../hooks/videoContext/useVideoContextForTab"
 
 /**
  * A component that displays the video context header.

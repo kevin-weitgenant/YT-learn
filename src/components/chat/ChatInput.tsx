@@ -1,7 +1,7 @@
 import { Eraser, Loader2, Pause } from "lucide-react"
 import { useChatStore } from "../../stores/chatStore"
-import { CircularProgress } from "./CircularProgress"
-import { ChapterSelectionHeader } from "./ChapterSelectionHeader"
+import { CircularProgress } from "./ui/CircularProgress"
+import { ChapterSelectionHeader } from "./chapters/ChapterSelectionHeader"
 import { useChapterStore } from "../../stores/chapterStore"
 
 /**
@@ -30,11 +30,7 @@ export function ChatInput() {
     }
   }
 
-  const handleSend = () => {
-    if (isSessionReady) {
-      sendMessage(inputText)
-    }
-  }
+
 
   return (
     <div className="bg-gradient-to-b from-white to-gray-50 border-t border-gray-200 px-6 py-5">

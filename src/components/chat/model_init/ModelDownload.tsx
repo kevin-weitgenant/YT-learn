@@ -1,8 +1,7 @@
-import { useChatStore } from "../../stores/chatStore"
+import { useChatStore } from "../../../stores/chatStore"
 
 /**
- * Component that replaces ChatInput when model needs to be downloaded.
- * Shows download button, progress bar, and status messages.
+Shows if the model is unavailable, downloadable, downloading, or extracting.
  */
 export function ModelDownload() {
   const { availability, downloadProgress, isExtracting, startDownload } =

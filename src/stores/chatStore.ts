@@ -1,7 +1,7 @@
 import { create } from "zustand"
 
 import type { Message } from "~types/message"
-import type { TokenInfo } from "~hooks/streaming/useStreamingResponse"
+import type { TokenInfo } from "~hooks/chat/useStreamingResponse"
 import type { LanguageModelSession } from "~types/chrome-ai"
 
 interface ChatStore {
