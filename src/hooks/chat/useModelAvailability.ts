@@ -1,28 +1,28 @@
 import { useEffect } from "react"
 import type { LanguageModelSession } from "../../types/chrome-ai"
-import { useChatStore } from "../../stores/chatStore"
+import { useModelAvailabilityStore } from "../../stores/modelAvailabilityStore"
 
 /**
  * Custom hook to manage model availability and download progress.
  * Checks if the model is available and provides download functionality.
- * All state is managed in the chatStore.
+ * All state is managed in the modelAvailabilityStore.
  */
 export function useModelAvailability() {
   // Check availability on mount
   useEffect(() => {
     const checkAvailability = async () => {
       if (!("LanguageModel" in self)) {
-        useChatStore.setState({ availability: "unavailable" })
+        useModelAvailabilityStore.setState({ availability: "unavailable" })
         return
       }
 
       try {
         const languageModel = self.LanguageModel!
         const status = await languageModel.availability()
-        useChatStore.setState({ availability: status })
+        useModelAvailabilityStore.setState({ availability: status as any })
       } catch (err) {
         console.error("Failed to check model availability:", err)
-        useChatStore.setState({ availability: "unavailable" })
+        useModelAvailabilityStore.setState({ availability: "unavailable" })
       }
     }
 
@@ -36,7 +36,7 @@ export function useModelAvailability() {
     }
 
     try {
-      useChatStore.setState({
+      useModelAvailabilityStore.setState({
         availability: "downloading",
         downloadProgress: 0,
         isExtracting: false
@@ -50,11 +50,11 @@ export function useModelAvailability() {
         monitor(m) {
           modelNewlyDownloaded = true
           m.addEventListener("downloadprogress", (e) => {
-            useChatStore.setState({ downloadProgress: e.loaded })
+            useModelAvailabilityStore.setState({ downloadProgress: e.loaded })
 
             // When download completes, show extraction/loading state
             if (e.loaded === 1) {
-              useChatStore.setState({ isExtracting: true })
+              useModelAvailabilityStore.setState({ isExtracting: true })
             }
           })
         }
@@ -66,14 +66,14 @@ export function useModelAvailability() {
       }
 
       // Model is now available
-      useChatStore.setState({
+      useModelAvailabilityStore.setState({
         availability: "available",
         isExtracting: false,
         downloadProgress: 1
       })
     } catch (err) {
       console.error("Failed to download model:", err)
-      useChatStore.setState({
+      useModelAvailabilityStore.setState({
         availability: "unavailable",
         isExtracting: false
       })

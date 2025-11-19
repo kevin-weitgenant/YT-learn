@@ -15,9 +15,6 @@ interface ChatStore {
   hasUserMessages: boolean
   hasTranscriptError: boolean
   tokenInfo: TokenInfo
-  availability: "available" | "downloadable" | "downloading" | "unavailable" | null
-  downloadProgress: number
-  isExtracting: boolean
   apiAvailable: boolean | null
   session: LanguageModelSession | null
   isOpeningChat: boolean
@@ -49,9 +46,6 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     inputQuota: 0,
     percentageUsed: 0
   },
-  availability: null,
-  downloadProgress: 0,
-  isExtracting: false,
   apiAvailable: null,
   session: null,
   isOpeningChat: false,

@@ -5,11 +5,12 @@ import { useAISession } from "./useAISession"
 import { useModelAvailability } from "./useModelAvailability"
 import { useStreamingResponse } from "./useStreamingResponse"
 import { useChatStore } from "../../stores/chatStore"
+import { useModelAvailabilityStore } from "../../stores/modelAvailabilityStore"
 
 
 export function useChatSession(videoContext: VideoContext | null) {
   // Use separate selectors to avoid creating new object references
-  const availability = useChatStore((state) => state.availability)
+  const availability = useModelAvailabilityStore((state) => state.availability)
   const messages = useChatStore((state) => state.messages)
   const session = useChatStore((state) => state.session)
 

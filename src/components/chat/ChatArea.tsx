@@ -1,11 +1,11 @@
 import { ChatInput } from "./ChatInput"
 import { MessageList } from "./messages/MessageList"
 import { ModelDownload } from "./model_init/ModelDownload"
-import { useChatStore } from "../../stores/chatStore"
+import { useModelAvailabilityStore } from "../../stores/modelAvailabilityStore"
 
 
 export function ChatArea() {
-  const availability = useChatStore((state) => state.availability)
+  const availability = useModelAvailabilityStore((state) => state.availability)
 
   return (
     <>
