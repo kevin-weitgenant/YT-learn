@@ -1,10 +1,10 @@
-import { useEffect } from "react"
-import type { LanguageModelSession } from "../../types/chrome-ai"
+import { useEffect, useState } from "react"
+
 import type { Message } from "../../types/message"
 import type { VideoContext } from "../../types/transcript"
 import { useChatStore } from "../../stores/chatStore"
-import { AI_CONFIG, ERROR_MESSAGES } from "../../utils/constants"
-import { createSystemPrompt } from "../../utils/systemPrompt"
+import { ERROR_MESSAGES } from "../../utils/constants"
+import { createAISession } from "../../utils/aiSession"
 
 interface UseAISessionProps {
   videoContext: VideoContext | null
@@ -12,152 +12,76 @@ interface UseAISessionProps {
 }
 
 /**
- * Custom hook to manage AI session initialization and cleanup.
- * Checks for Prompt API availability and creates a session based on video context.
- * All state is managed in the chatStore.
- * @param videoContext The video context to use for the session.
+ * Manages the AI model session, including initialization, cleanup, and reset.
+ * @param videoContext Context from the video for system prompts.
+ * @param shouldInitialize Controls when the session is created.
  */
 export function useAISession({
   videoContext,
   shouldInitialize
 }: UseAISessionProps) {
-  // Helper function to create a new session with dynamic system prompt
-  const createSession = async (
-    context?: VideoContext
-  ): Promise<LanguageModelSession | null> => {
-    if (!("LanguageModel" in self)) return null
+  const [resetCount, setResetCount] = useState(0)
 
-    const languageModel = self.LanguageModel!
-
-    // Create empty session first (no initialPrompts - will be added via append())
-    const session = await languageModel.create({
-      temperature: AI_CONFIG.temperature,
-      topK: AI_CONFIG.topK
-      // NO initialPrompts - system prompt will be appended by decideRAGStrategy
-    })
-
-    let systemPrompt: string
-
-    // Decide strategy based on context and append system prompt
-    if (!context) {
-      systemPrompt = "You are a helpful and friendly assistant."
-      // Append system prompt to empty session
-      await session.append([{ role: "system", content: systemPrompt }])
-    } else {
-      // createSystemPrompt will append the system prompt internally
-      systemPrompt = await createSystemPrompt(context, session)
+  const handleError = (message: string, error?: unknown) => {
+    console.error(message, error)
+    const errorDetails = error
+      ? `: ${error instanceof Error ? error.message : "Unknown error"}`
+      : ""
+    const errorMessage: Message = {
+      id: Date.now(),
+      text: `${message}${errorDetails}`,
+      sender: "bot"
     }
-
-    console.log(
-      `💬 System Prompt (${systemPrompt.length} chars):`,
-      systemPrompt.substring(0, 150) + "..."
-    )
-
-    // Measure system prompt tokens
-    let systemTokenCount = 0
-    try {
-      systemTokenCount = await session.measureInputUsage(systemPrompt)
-      const { setMessages } = useChatStore.getState()
-      setMessages([]) // Clear messages on new session
-      const tokenInfo = {
-        systemTokens: systemTokenCount,
-        conversationTokens: 0,
-        totalTokens: systemTokenCount,
-        inputQuota: session.inputQuota || 0,
-        percentageUsed:
-          ((systemTokenCount / (session.inputQuota || 1)) * 100)
-      }
-      useChatStore.setState({ tokenInfo })
-
-      console.log("🔧 [SESSION CREATED - TOKEN BREAKDOWN]")
-      console.log("  System prompt length:", systemPrompt.length, "chars")
-      console.log("  System prompt tokens:", systemTokenCount)
-      console.log("  session.inputUsage:", session.inputUsage ?? "undefined")
-      console.log("  session.inputQuota:", session.inputQuota ?? "undefined")
-      console.log(
-        "  System % of quota:",
-        ((systemTokenCount / (session.inputQuota || 1)) * 100).toFixed(2) + "%"
-      )
-      console.log("---")
-    } catch (error) {
-      console.error("Failed to measure system tokens:", error)
-    }
-
-    return session
+    useChatStore.setState({ messages: [errorMessage], isSessionReady: false })
   }
 
   useEffect(() => {
+    if (!shouldInitialize || !videoContext) {
+      return
+    }
+
+    let isCancelled = false
+
     const initializeSession = async () => {
-      // Don't initialize until we have video context AND model is available
-      if (!shouldInitialize || !videoContext) {
-        return
-      }
-
-      if (!("LanguageModel" in self)) {
-        useChatStore.setState({ apiAvailable: false })
-        const errorMessage: Message = {
-          id: Date.now(),
-          text: ERROR_MESSAGES.API_NOT_AVAILABLE,
-          sender: "bot"
-        }
-        useChatStore.setState({ messages: [errorMessage] })
-        return
-      }
-
-      useChatStore.setState({ apiAvailable: true })
+      // Clear previous state before creating a new session
+      const { session: currentSession } = useChatStore.getState()
+      currentSession?.destroy()
+      useChatStore.setState({ session: null, isSessionReady: false })
 
       try {
-        const newSession = await createSession(videoContext)
-        useChatStore.setState({ session: newSession, isSessionReady: true })
-      } catch (error) {
-        console.error("Failed to create session:", error)
-        const errorMessage: Message = {
-          id: Date.now(),
-          text: `${ERROR_MESSAGES.SESSION_INIT_FAILED}: ${
-            error instanceof Error ? error.message : "Unknown error"
-          }`,
-          sender: "bot"
+        const { session, tokenInfo } = await createAISession(videoContext)
+
+        if (isCancelled) {
+          session.destroy()
+          return
         }
-        useChatStore.setState({ messages: [errorMessage], isSessionReady: false })
+
+        useChatStore.getState().setMessages([])
+        useChatStore.setState({
+          session,
+          isSessionReady: true,
+          tokenInfo
+        })
+      } catch (error) {
+        if (isCancelled) return
+        handleError(ERROR_MESSAGES.SESSION_INIT_FAILED, error)
       }
     }
 
     initializeSession()
 
-    // Cleanup: destroy session on unmount or when videoContext changes
     return () => {
+      isCancelled = true
+      // Also destroy the session on cleanup to handle fast re-renders
       const { session } = useChatStore.getState()
       session?.destroy()
       useChatStore.setState({ session: null, isSessionReady: false })
     }
-  }, [videoContext, shouldInitialize])
+  }, [shouldInitialize, videoContext, resetCount])
 
-  // Reset session function - destroys current session and creates a new one
-  const resetSession = async () => {
-    try {
-      // Destroy current session if it exists
-      const { session } = useChatStore.getState()
-      if (session?.destroy) {
-        session.destroy()
-      }
-      useChatStore.setState({ session: null, isSessionReady: false })
-
-      // Create new session with current video context
-      const newSession = await createSession(videoContext)
-      useChatStore.setState({ session: newSession, isSessionReady: true })
-    } catch (error) {
-      console.error("Failed to reset session:", error)
-      const errorMessage: Message = {
-        id: Date.now(),
-        text: `Failed to reset session: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`,
-        sender: "bot"
-      }
-      useChatStore.setState({ messages: [errorMessage], isSessionReady: false })
-    }
+  const resetSession = () => {
+    setResetCount((c) => c + 1)
   }
 
-  // Return function for components to use
   return { resetSession }
 }

@@ -8,7 +8,7 @@ import { useChatStore } from "../../stores/chatStore"
 import { useModelAvailabilityStore } from "../../stores/modelAvailabilityStore"
 
 
-export function useChatSession(videoContext: VideoContext | null) {
+export function useChatOrquestrator(videoContext: VideoContext | null) {
   // Use separate selectors to avoid creating new object references
   const availability = useModelAvailabilityStore((state) => state.availability)
   const messages = useChatStore((state) => state.messages)

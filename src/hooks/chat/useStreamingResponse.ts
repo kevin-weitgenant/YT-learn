@@ -1,16 +1,8 @@
 import { useEffect, useRef } from "react"
 import type { LanguageModelSession } from "../../types/chrome-ai"
-import type { Message } from "../../types/message"
+import type { Message, TokenInfo } from "../../types/message"
 import { useChatStore } from "../../stores/chatStore"
 import { ERROR_MESSAGES } from "../../utils/constants"
-
-export interface TokenInfo {
-  systemTokens: number // System message tokens
-  conversationTokens: number // User + assistant tokens
-  totalTokens: number // System + conversation
-  inputQuota: number // Total token quota
-  percentageUsed: number // 0-100%
-}
 
 /**
  * Custom hook to handle streaming AI responses

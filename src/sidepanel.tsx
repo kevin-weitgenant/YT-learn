@@ -1,7 +1,7 @@
 import "~style.css"
 
 import { useVideoContextForTab } from "./hooks/videoContext/useVideoContextForTab"
-import { useChatSession } from "./hooks/chat/useChatSession"
+import { useChatOrquestrator } from "./hooks/chat/useChatOrquestrator"
 import { VideoContextHeader } from "./components/chat/video-context/VideoContextHeader"
 import { ChatArea } from "./components/chat/ChatArea"
 import { ChapterOverlay } from "./components/chat/chapters/ChapterOverlay"
@@ -9,7 +9,7 @@ import { ChapterOverlay } from "./components/chat/chapters/ChapterOverlay"
 
 function SidePanel() {
   const videoContext = useVideoContextForTab()
-  useChatSession(videoContext)
+  useChatOrquestrator(videoContext)
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">

@@ -1,7 +1,6 @@
 import { create } from "zustand"
 
-import type { Message } from "~types/message"
-import type { TokenInfo } from "~hooks/chat/useStreamingResponse"
+import type { Message, TokenInfo } from "~types/message"
 import type { LanguageModelSession } from "~types/chrome-ai"
 import type { VideoContext } from "~types/transcript"
 
