@@ -78,13 +78,11 @@ Total: ${tokenInfo.totalTokens?.toLocaleString() || 0} / ${tokenInfo.inputQuota?
               placeholder={
                 hasTranscriptError
                   ? "Chat is unavailable for this video."
-                  : isSessionReady
-                    ? "Ask anything about the video..."
-                    : "Preparing session..."
+                  : "Ask anything about the video..."
               }
               className="flex-1 resize-none bg-transparent px-3 py-2.5 focus:outline-none placeholder:text-gray-400 text-gray-900 disabled:bg-gray-50 disabled:cursor-not-allowed"
               rows={3}
-              disabled={hasTranscriptError || !isSessionReady}
+              disabled={hasTranscriptError}
             />
 
             {/* Loading spinner while session is initializing (and no transcript error) */}
