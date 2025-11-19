@@ -80,6 +80,9 @@ export function useAISession({
   }, [shouldInitialize, videoContext, resetCount])
 
   const resetSession = () => {
+    const { setMessages } = useChatStore.getState()
+    setMessages([])
+    useChatStore.setState({ hasUserMessages: false })
     setResetCount((c) => c + 1)
   }
 

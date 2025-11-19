@@ -54,7 +54,14 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   setVideoContext: (context) => set({ videoContext: context }),
   setInputText: (text) => set({ inputText: text }),
   setMessages: (messages) => set({ messages }),
-  addMessage: (message) => set((state) => ({ messages: [...state.messages, message] })),
+  addMessage: (message) =>
+    set((state) => {
+      const isUserMessage = message.sender === "user"
+      return {
+        messages: [...state.messages, message],
+        hasUserMessages: isUserMessage || state.hasUserMessages
+      }
+    }),
   updateLastMessage: (text) =>
     set((state) => {
       if (state.messages.length === 0) return {}
