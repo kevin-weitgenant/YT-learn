@@ -1,5 +1,6 @@
 import { Eraser, Loader2, Pause } from "lucide-react"
 import { useChatStore } from "../../stores/chatStore"
+import { useSessionStore } from "../../stores/sessionStore"
 import { useStreamingResponse } from "../../hooks/chat/useStreamingResponse"
 import { useAISession } from "../../hooks/chat/useAISession"
 import { CircularProgress } from "./ui/CircularProgress"
@@ -13,15 +14,14 @@ import { useChapterStore } from "../../stores/chapterStore"
 export function ChatInput() {
   const {
     videoContext,
-    session,
     inputText,
     setInputText,
     isStreaming,
-    isSessionReady,
     tokenInfo,
     hasUserMessages,
     hasTranscriptError
   } = useChatStore()
+  const { session, isSessionReady } = useSessionStore()
   const { resetSession } = useAISession({ videoContext, shouldInitialize: false })
   const { sendMessage, stopStreaming } = useStreamingResponse(session)
   const chapters = useChapterStore((state) => state.chapters)
