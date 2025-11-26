@@ -44,45 +44,66 @@ interface ChapterMarker {
 }
 
 /**
- * Access ytInitialData from page context
+ * Access ytInitialData from page context with retry logic
  *
  * ytInitialData is a global object embedded in YouTube's watch page.
  * As a content script, we can access it directly via window object.
  *
- * @returns ytInitialData object or null if not found
+ * Since YouTube is an SPA, ytInitialData may not be immediately available
+ * when the page loads or navigates. This function implements retry logic
+ * to wait for ytInitialData to become available.
+ *
+ * @param maxRetries - Maximum number of retry attempts (default: 10)
+ * @param delayMs - Delay between retries in milliseconds (default: 200ms)
+ * @returns ytInitialData object or null if not found after all retries
  */
-function getYtInitialData(): any {
-  try {
-    // Try accessing directly from window
-    if (typeof window !== 'undefined' && (window as any).ytInitialData) {
-      console.log('[Chapters] Found ytInitialData on window object');
-      return (window as any).ytInitialData;
-    }
+async function getYtInitialData(maxRetries: number = 10, delayMs: number = 200): Promise<any> {
+  console.log('[Chapters] 🔍 Attempting to get ytInitialData with retry logic...');
 
-    // Fallback: Parse from script tags in the page
-    console.log('[Chapters] Attempting to parse ytInitialData from script tags');
-    const scripts = document.querySelectorAll('script');
-    for (const script of Array.from(scripts)) {
-      const content = script.textContent || '';
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      // Try accessing directly from window
+      if (typeof window !== 'undefined' && (window as any).ytInitialData) {
+        console.log(`[Chapters] ✅ Found ytInitialData on window object (attempt ${attempt}/${maxRetries})`);
+        console.log('[Chapters] Debug: ytInitialData keys:', Object.keys((window as any).ytInitialData));
+        return (window as any).ytInitialData;
+      }
 
-      // Look for: var ytInitialData = {...};
-      const match = content.match(/var ytInitialData = ({.+?});/);
-      if (match && match[1]) {
-        try {
-          return JSON.parse(match[1]);
-        } catch (e) {
-          console.warn('[Chapters] Failed to parse ytInitialData from script tag:', e);
-          continue;
+      // Fallback: Parse from script tags in the page
+      const scripts = document.querySelectorAll('script');
+
+      for (const script of Array.from(scripts)) {
+        const content = script.textContent || '';
+
+        // Look for: var ytInitialData = {...};
+        const match = content.match(/var ytInitialData = ({.+?});/);
+        if (match && match[1]) {
+          try {
+            const data = JSON.parse(match[1]);
+            console.log(`[Chapters] ✅ Successfully parsed ytInitialData from script tag (attempt ${attempt}/${maxRetries})`);
+            return data;
+          } catch (e) {
+            // Continue to next script tag
+            continue;
+          }
         }
       }
-    }
 
-    console.warn('[Chapters] ytInitialData not found');
-    return null;
-  } catch (error) {
-    console.error('[Chapters] Error accessing ytInitialData:', error);
-    return null;
+      // Not found on this attempt
+      if (attempt < maxRetries) {
+        console.log(`[Chapters] ⏳ ytInitialData not ready yet, waiting ${delayMs}ms before retry ${attempt + 1}/${maxRetries}...`);
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+      }
+    } catch (error) {
+      console.error(`[Chapters] ❌ Error on attempt ${attempt}/${maxRetries}:`, error);
+      if (attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+      }
+    }
   }
+
+  console.warn(`[Chapters] ❌ ytInitialData not found after ${maxRetries} attempts`);
+  return null;
 }
 
 /**
@@ -102,24 +123,31 @@ function getYtInitialData(): any {
  */
 function findChapterMarkers(ytInitialData: any): ChapterMarker[] {
   try {
-    const markersMap = ytInitialData
-      ?.playerOverlays
-      ?.playerOverlayRenderer
-      ?.decoratedPlayerBarRenderer
-      ?.decoratedPlayerBarRenderer
-      ?.playerBar
-      ?.multiMarkersPlayerBarRenderer
-      ?.markersMap;
+    console.log('[Chapters] 🔍 Navigating to markersMap...');
+    console.log('[Chapters] Debug: playerOverlays exists:', !!ytInitialData?.playerOverlays);
+
+    const playerOverlayRenderer = ytInitialData?.playerOverlays?.playerOverlayRenderer;
+    console.log('[Chapters] Debug: playerOverlayRenderer exists:', !!playerOverlayRenderer);
+
+    const decoratedPlayerBarRenderer = playerOverlayRenderer?.decoratedPlayerBarRenderer?.decoratedPlayerBarRenderer;
+    console.log('[Chapters] Debug: decoratedPlayerBarRenderer exists:', !!decoratedPlayerBarRenderer);
+
+    const multiMarkersPlayerBarRenderer = decoratedPlayerBarRenderer?.playerBar?.multiMarkersPlayerBarRenderer;
+    console.log('[Chapters] Debug: multiMarkersPlayerBarRenderer exists:', !!multiMarkersPlayerBarRenderer);
+
+    const markersMap = multiMarkersPlayerBarRenderer?.markersMap;
 
     if (!markersMap || !Array.isArray(markersMap)) {
-      console.log('[Chapters] markersMap not found or not an array');
+      console.log('[Chapters] ❌ markersMap not found or not an array');
+      console.log('[Chapters] Debug: markersMap value:', markersMap);
       return [];
     }
 
-    console.log(`[Chapters] Found markersMap with ${markersMap.length} marker(s)`);
+    console.log(`[Chapters] ✅ Found markersMap with ${markersMap.length} marker(s)`);
+    console.log('[Chapters] Debug: marker keys:', markersMap.map((m: any) => m.key));
     return markersMap;
   } catch (error) {
-    console.error('[Chapters] Error navigating to markersMap:', error);
+    console.error('[Chapters] ❌ Error navigating to markersMap:', error);
     return [];
   }
 }
@@ -134,31 +162,38 @@ function findChapterMarkers(ytInitialData: any): ChapterMarker[] {
  */
 function extractChaptersFromMarkers(markers: ChapterMarker[]): Chapter[] {
   try {
+    console.log('[Chapters] 🔍 Extracting chapters from markers...');
+    console.log(`[Chapters] Debug: Processing ${markers.length} marker(s)`);
+
     // Look for DESCRIPTION_CHAPTERS first (manual), then AUTO_CHAPTERS (auto)
     let chaptersData: RawChapterRenderer[] | null = null;
     let chapterType = '';
 
     for (const marker of markers) {
       const key = marker.key?.toUpperCase();
+      console.log(`[Chapters] Debug: Checking marker with key: "${key}"`);
 
       if (key === 'DESCRIPTION_CHAPTERS') {
         chaptersData = marker.value?.chapters;
         chapterType = 'DESCRIPTION_CHAPTERS';
-        console.log('[Chapters] Found DESCRIPTION_CHAPTERS (manual)');
+        console.log('[Chapters] ✅ Found DESCRIPTION_CHAPTERS (manual)');
+        console.log(`[Chapters] Debug: DESCRIPTION_CHAPTERS count: ${chaptersData?.length ?? 0}`);
         break; // Prefer manual chapters
       } else if (key === 'AUTO_CHAPTERS' && !chaptersData) {
         chaptersData = marker.value?.chapters;
         chapterType = 'AUTO_CHAPTERS';
-        console.log('[Chapters] Found AUTO_CHAPTERS (auto-generated)');
+        console.log('[Chapters] ✅ Found AUTO_CHAPTERS (auto-generated)');
+        console.log(`[Chapters] Debug: AUTO_CHAPTERS count: ${chaptersData?.length ?? 0}`);
       }
     }
 
     if (!chaptersData || !Array.isArray(chaptersData) || chaptersData.length === 0) {
-      console.log('[Chapters] No chapters found in markers');
+      console.log('[Chapters] ❌ No chapters found in markers');
+      console.log('[Chapters] Debug: chaptersData:', chaptersData);
       return [];
     }
 
-    console.log(`[Chapters] Extracting ${chaptersData.length} chapters from ${chapterType}`);
+    console.log(`[Chapters] ✅ Extracting ${chaptersData.length} chapters from ${chapterType}`);
 
     // Parse chapters
     const chapters: Chapter[] = chaptersData
@@ -203,56 +238,71 @@ function extractChaptersFromMarkers(markers: ChapterMarker[]): Chapter[] {
  * Extract video chapters from YouTube page
  *
  * Main public function - call this to get chapters.
- * Accesses ytInitialData from page context (instant - no HTTP requests).
+ * Accesses ytInitialData from page context with retry logic to handle timing issues.
  * Returns empty array if no chapters found or on error.
  *
  * @param videoId - YouTube video ID (used for logging only)
- * @returns Array of chapters with title and startSeconds, or empty array
+ * @returns Promise resolving to array of chapters with title and startSeconds, or empty array
  *
  * @example
- * const chapters = extractChapters('dQw4w9WgXcQ');
+ * const chapters = await extractChapters('dQw4w9WgXcQ');
  * // [
  * //   { title: "Introduction", startSeconds: 0 },
  * //   { title: "Main Content", startSeconds: 83 },
  * //   { title: "Conclusion", startSeconds: 245 }
  * // ]
  */
-export function extractChapters(videoId: string): Chapter[] {
+export async function extractChapters(videoId: string): Promise<Chapter[]> {
   const startTime = Date.now();
 
   try {
-    console.log(`[Chapters] Extracting chapters for video: ${videoId}`);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log(`[Chapters] 🎬 Starting chapter extraction for video: ${videoId}`);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
-    // Step 1: Get ytInitialData from page
-    const ytInitialData = getYtInitialData();
+    // Step 1: Get ytInitialData from page (with retry logic)
+    console.log('[Chapters] STEP 1: Getting ytInitialData from page (with retry logic)...');
+    const ytInitialData = await getYtInitialData();
     if (!ytInitialData) {
-      console.log('[Chapters] ytInitialData not available - returning empty array');
+      console.log('[Chapters] ❌ FAILED at STEP 1: ytInitialData not available after retries');
+      console.log('[Chapters] Result: Returning empty array');
       return [];
     }
+    console.log('[Chapters] ✅ STEP 1 COMPLETE: ytInitialData retrieved');
 
     // Step 2: Navigate to markersMap
+    console.log('[Chapters] STEP 2: Navigating to markersMap...');
     const markers = findChapterMarkers(ytInitialData);
     if (markers.length === 0) {
-      console.log('[Chapters] No markers found - video likely has no chapters');
+      console.log('[Chapters] ❌ FAILED at STEP 2: No markers found');
+      console.log('[Chapters] Result: Video likely has no chapters');
       return [];
     }
+    console.log(`[Chapters] ✅ STEP 2 COMPLETE: Found ${markers.length} marker(s)`);
 
     // Step 3: Extract chapters from markers
+    console.log('[Chapters] STEP 3: Extracting chapters from markers...');
     const chapters = extractChaptersFromMarkers(markers);
 
     const duration = Date.now() - startTime;
 
     if (chapters.length > 0) {
-      console.log(`[Chapters] ✅ Extracted ${chapters.length} chapter(s) in ${duration}ms`);
-      console.log('[Chapters] Chapters:', chapters);
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log(`[Chapters] ✅✅✅ SUCCESS: Extracted ${chapters.length} chapter(s) in ${duration}ms`);
+      console.log('[Chapters] Chapters data:', chapters);
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     } else {
-      console.log(`[Chapters] ℹ️ No chapters found for this video (${duration}ms)`);
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log(`[Chapters] ⚠️ STEP 3 COMPLETE but no chapters extracted (${duration}ms)`);
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     }
 
     return chapters;
   } catch (error) {
     const duration = Date.now() - startTime;
-    console.error(`[Chapters] ❌ Error extracting chapters (${duration}ms):`, error);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.error(`[Chapters] ❌❌❌ ERROR: Exception during extraction (${duration}ms):`, error);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     return []; // Return empty array on error (graceful failure)
   }
 }

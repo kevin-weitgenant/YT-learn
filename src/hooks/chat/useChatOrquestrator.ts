@@ -5,7 +5,6 @@ import { useAISession } from "./useAISession"
 import { useModelAvailability } from "./useModelAvailability"
 import { useStreamingResponse } from "./useStreamingResponse"
 import { useChatStore } from "../../stores/chatStore"
-import { useSessionStore } from "../../stores/sessionStore"
 import { useModelAvailabilityStore } from "../../stores/modelAvailabilityStore"
 
 
@@ -13,7 +12,7 @@ export function useChatOrquestrator(videoContext: VideoContext | null) {
   // Use separate selectors to avoid creating new object references
   const availability = useModelAvailabilityStore((state) => state.availability)
   const messages = useChatStore((state) => state.messages)
-  const session = useSessionStore((state) => state.session)
+  const session = useChatStore((state) => state.session)
 
   // transcript comes from videoContext, not store
   const transcript = videoContext?.transcript

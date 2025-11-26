@@ -94,8 +94,13 @@ export async function extractYouTubeContextHybrid(): Promise<VideoContext> {
     // Get metadata from DOM (fast - no waiting)
     const { title, url, channel } = getVideoMetadata();
 
-    // Extract chapters (instant - from ytInitialData)
-    const chapters = extractChapters(videoId);
+    // Extract chapters (with retry logic for ytInitialData)
+    console.log('[Transcript] 📑 Extracting chapters via extractChapters()...');
+    const chapters = await extractChapters(videoId);
+    console.log(`[Transcript] 📑 Chapter extraction complete. Found ${chapters?.length ?? 0} chapters`);
+    if (chapters && chapters.length > 0) {
+      console.log('[Transcript] 📑 Chapter titles:', chapters.map(c => c.title));
+    }
 
     const totalDuration = Date.now() - overallStart;
     console.log(`[Transcript] 🎉 Hybrid extraction completed in ${totalDuration}ms via FAST method`);
@@ -126,8 +131,13 @@ export async function extractYouTubeContextHybrid(): Promise<VideoContext> {
       // Use existing DOM scraping method
       const videoContext = await extractYouTubeContext();
 
-      // Extract chapters (instant - from ytInitialData)
-      const chapters = extractChapters(videoId);
+      // Extract chapters (with retry logic for ytInitialData)
+      console.log('[Transcript] 📑 Extracting chapters via extractChapters() (DOM fallback path)...');
+      const chapters = await extractChapters(videoId);
+      console.log(`[Transcript] 📑 Chapter extraction complete. Found ${chapters?.length ?? 0} chapters`);
+      if (chapters && chapters.length > 0) {
+        console.log('[Transcript] 📑 Chapter titles:', chapters.map(c => c.title));
+      }
 
       const fallbackDuration = Date.now() - fallbackStart;
       const totalDuration = Date.now() - overallStart;
@@ -154,7 +164,12 @@ export async function extractYouTubeContextHybrid(): Promise<VideoContext> {
       const { title, url, channel } = getVideoMetadata();
 
       // Still try to extract chapters (they might be available even if transcript isn't)
-      const chapters = extractChapters(videoId);
+      console.log('[Transcript] 📑 Extracting chapters via extractChapters() (error path - no transcript available)...');
+      const chapters = await extractChapters(videoId);
+      console.log(`[Transcript] 📑 Chapter extraction complete. Found ${chapters?.length ?? 0} chapters`);
+      if (chapters && chapters.length > 0) {
+        console.log('[Transcript] 📑 Chapter titles:', chapters.map(c => c.title));
+      }
 
       return {
         videoId,

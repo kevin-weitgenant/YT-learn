@@ -3,7 +3,6 @@ import { useEffect, useState } from "react"
 import type { Message } from "../../types/message"
 import type { VideoContext } from "../../types/transcript"
 import { useChatStore } from "../../stores/chatStore"
-import { useSessionStore } from "../../stores/sessionStore"
 import { ERROR_MESSAGES } from "../../utils/constants"
 import { createAISession } from "../../utils/aiSession"
 
@@ -33,8 +32,7 @@ export function useAISession({
       text: `${message}${errorDetails}`,
       sender: "bot"
     }
-    useChatStore.setState({ messages: [errorMessage] })
-    useSessionStore.getState().setIsSessionReady(false)
+    useChatStore.setState({ messages: [errorMessage], isSessionReady: false })
   }
 
   useEffect(() => {
@@ -46,7 +44,9 @@ export function useAISession({
 
     const initializeSession = async () => {
       // Clear previous state before creating a new session
-      useSessionStore.getState().destroySession()
+      const { session: currentSession } = useChatStore.getState()
+      currentSession?.destroy()
+      useChatStore.setState({ session: null, isSessionReady: false })
 
       try {
         const { session, tokenInfo } = await createAISession(videoContext)
@@ -57,8 +57,9 @@ export function useAISession({
         }
 
         useChatStore.getState().setMessages([])
-        useSessionStore.getState().setSession(session)
         useChatStore.setState({
+          session,
+          isSessionReady: true,
           tokenInfo
         })
       } catch (error) {
@@ -72,7 +73,9 @@ export function useAISession({
     return () => {
       isCancelled = true
       // Also destroy the session on cleanup to handle fast re-renders
-      useSessionStore.getState().destroySession()
+      const { session } = useChatStore.getState()
+      session?.destroy()
+      useChatStore.setState({ session: null, isSessionReady: false })
     }
   }, [shouldInitialize, videoContext, resetCount])
 

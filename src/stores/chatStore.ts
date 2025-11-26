@@ -1,7 +1,7 @@
 import { create } from "zustand"
 
 import type { Message, TokenInfo } from "~types/message"
-
+import type { LanguageModelSession } from "~types/chrome-ai"
 import type { VideoContext } from "~types/transcript"
 
 interface ChatStore {
@@ -10,12 +10,12 @@ interface ChatStore {
   messages: Message[]
   inputText: string
   isStreaming: boolean
-
+  isSessionReady: boolean
   hasUserMessages: boolean
   hasTranscriptError: boolean
   tokenInfo: TokenInfo
   apiAvailable: boolean | null
-
+  session: LanguageModelSession | null
   isOpeningChat: boolean
   openChatError: string | null
 
@@ -35,7 +35,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   messages: [],
   inputText: "",
   isStreaming: false,
-
+  isSessionReady: false,
   hasUserMessages: false,
   hasTranscriptError: false,
   tokenInfo: {
@@ -46,7 +46,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     percentageUsed: 0
   },
   apiAvailable: null,
-
+  session: null,
   isOpeningChat: false,
   openChatError: null,
 

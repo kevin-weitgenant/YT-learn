@@ -41,10 +41,34 @@ export function useVideoContextForTab(): VideoContext | null {
 
   // Step 4: When videoContext is loaded or changed, update the global chapter store.
   useEffect(() => {
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('[VideoContext] 📦 VideoContext changed, checking for chapters...');
+    console.log('[VideoContext] Debug info:', {
+      hasVideoContext: !!videoContext,
+      videoId: videoContext?.videoId ?? 'N/A',
+      hasChapters: !!videoContext?.chapters,
+      chaptersIsArray: Array.isArray(videoContext?.chapters),
+      chaptersLength: videoContext?.chapters?.length ?? 0,
+      chapters: videoContext?.chapters
+    });
+
     // We only update the store if there are chapters to prevent unnecessary re-renders.
     if (videoContext?.chapters && videoContext.chapters.length > 0) {
+      console.log(`[VideoContext] ✅ Setting ${videoContext.chapters.length} chapters to global store`);
+      console.log('[VideoContext] Chapter titles:', videoContext.chapters.map(c => c.title));
       setChapters(videoContext.chapters)
+      console.log('[VideoContext] ✅ Chapters successfully set to store');
+    } else {
+      console.log('[VideoContext] ⚠️ NOT setting chapters to store');
+      if (!videoContext) {
+        console.log('[VideoContext] Reason: videoContext is null/undefined');
+      } else if (!videoContext.chapters) {
+        console.log('[VideoContext] Reason: videoContext.chapters is null/undefined');
+      } else if (videoContext.chapters.length === 0) {
+        console.log('[VideoContext] Reason: videoContext.chapters is empty array');
+      }
     }
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   }, [videoContext, setChapters]) // Dependency on videoContext ensures this runs when data changes.
 
   // Step 5: Sync videoContext to chatStore for easy access by components

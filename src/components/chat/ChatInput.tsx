@@ -1,6 +1,5 @@
 import { Eraser, Loader2, Pause } from "lucide-react"
 import { useChatStore } from "../../stores/chatStore"
-import { useSessionStore } from "../../stores/sessionStore"
 import { useStreamingResponse } from "../../hooks/chat/useStreamingResponse"
 import { useAISession } from "../../hooks/chat/useAISession"
 import { CircularProgress } from "./ui/CircularProgress"
@@ -14,17 +13,42 @@ import { useChapterStore } from "../../stores/chapterStore"
 export function ChatInput() {
   const {
     videoContext,
+    session,
     inputText,
     setInputText,
     isStreaming,
+    isSessionReady,
     tokenInfo,
     hasUserMessages,
     hasTranscriptError
   } = useChatStore()
-  const { session, isSessionReady } = useSessionStore()
   const { resetSession } = useAISession({ videoContext, shouldInitialize: false })
   const { sendMessage, stopStreaming } = useStreamingResponse(session)
   const chapters = useChapterStore((state) => state.chapters)
+
+  // Debug logging for chapter rendering
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('[ChatInput] 🎨 Rendering ChatInput component');
+  console.log('[ChatInput] Chapters from store:', {
+    hasChapters: !!chapters,
+    isArray: Array.isArray(chapters),
+    length: chapters?.length ?? 0,
+    willRenderHeader: !!(chapters && chapters.length > 0)
+  });
+  if (chapters && chapters.length > 0) {
+    console.log('[ChatInput] ✅ Chapter header WILL be rendered');
+    console.log('[ChatInput] Chapter data:', chapters);
+  } else {
+    console.log('[ChatInput] ⚠️ Chapter header will NOT be rendered');
+    if (!chapters) {
+      console.log('[ChatInput] Reason: chapters is null/undefined');
+    } else if (!Array.isArray(chapters)) {
+      console.log('[ChatInput] Reason: chapters is not an array');
+    } else if (chapters.length === 0) {
+      console.log('[ChatInput] Reason: chapters array is empty');
+    }
+  }
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey && isSessionReady) {
