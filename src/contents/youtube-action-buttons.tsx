@@ -35,7 +35,7 @@ export const getInlineAnchor: PlasmoGetInlineAnchor = async () => {
 
 /**
  * YouTube Action Buttons Container
- * Renders Chat and Quiz buttons inline with YouTube's native buttons
+ * Renders Chat  button inline with YouTube's native buttons
  */
 const YoutubeActionButtons = () => {
   const openChatError = useChatStore((state) => state.openChatError)
