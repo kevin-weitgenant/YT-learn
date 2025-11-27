@@ -10,8 +10,7 @@
  */
 
 import { extractVideoId, extractYouTubeContext } from './youtubeTranscript';
-import { fetchFirstAvailableTranscript } from './youtubeTranscriptFast';
-import { extractChapters } from './youtubeChapters';
+import { fetchFirstAvailableTranscript, extractChaptersFromInnerTubeDescription } from './youtubeTranscriptFast';
 import type { VideoContext } from '~types/transcript';
 
 /**
@@ -94,9 +93,9 @@ export async function extractYouTubeContextHybrid(): Promise<VideoContext> {
     // Get metadata from DOM (fast - no waiting)
     const { title, url, channel } = getVideoMetadata();
 
-    // Extract chapters (with retry logic for ytInitialData)
-    console.log('[Transcript] 📑 Extracting chapters via extractChapters()...');
-    const chapters = await extractChapters(videoId);
+    // Extract chapters from InnerTube API description
+    console.log('[Transcript] 📑 Extracting chapters from InnerTube description...');
+    const chapters = await extractChaptersFromInnerTubeDescription(videoId);
     console.log(`[Transcript] 📑 Chapter extraction complete. Found ${chapters?.length ?? 0} chapters`);
     if (chapters && chapters.length > 0) {
       console.log('[Transcript] 📑 Chapter titles:', chapters.map(c => c.title));
@@ -131,9 +130,9 @@ export async function extractYouTubeContextHybrid(): Promise<VideoContext> {
       // Use existing DOM scraping method
       const videoContext = await extractYouTubeContext();
 
-      // Extract chapters (with retry logic for ytInitialData)
-      console.log('[Transcript] 📑 Extracting chapters via extractChapters() (DOM fallback path)...');
-      const chapters = await extractChapters(videoId);
+      // Extract chapters from InnerTube API description
+      console.log('[Transcript] 📑 Extracting chapters from InnerTube description (DOM fallback path)...');
+      const chapters = await extractChaptersFromInnerTubeDescription(videoId);
       console.log(`[Transcript] 📑 Chapter extraction complete. Found ${chapters?.length ?? 0} chapters`);
       if (chapters && chapters.length > 0) {
         console.log('[Transcript] 📑 Chapter titles:', chapters.map(c => c.title));
@@ -163,9 +162,9 @@ export async function extractYouTubeContextHybrid(): Promise<VideoContext> {
       // Instead of throwing, return a context object with an error message
       const { title, url, channel } = getVideoMetadata();
 
-      // Still try to extract chapters (they might be available even if transcript isn't)
-      console.log('[Transcript] 📑 Extracting chapters via extractChapters() (error path - no transcript available)...');
-      const chapters = await extractChapters(videoId);
+      // Try to extract chapters from InnerTube description (might still work even if transcript failed)
+      console.log('[Transcript] 📑 Attempting chapter extraction despite transcript failure...');
+      const chapters = await extractChaptersFromInnerTubeDescription(videoId);
       console.log(`[Transcript] 📑 Chapter extraction complete. Found ${chapters?.length ?? 0} chapters`);
       if (chapters && chapters.length > 0) {
         console.log('[Transcript] 📑 Chapter titles:', chapters.map(c => c.title));

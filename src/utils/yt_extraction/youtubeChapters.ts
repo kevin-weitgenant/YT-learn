@@ -1,5 +1,27 @@
 /**
- * YouTube Chapter Extraction Utility
+ * ⚠️ DEPRECATED: YouTube Chapter Extraction via ytInitialData
+ *
+ * @deprecated This file is DEPRECATED as of 2025-11-27.
+ *
+ * NEW METHOD: Chapter extraction now uses InnerTube API description parsing.
+ * See: youtubeTranscriptFast.ts -> extractChaptersFromInnerTubeDescription()
+ *
+ * REASON FOR DEPRECATION:
+ * - ytInitialData doesn't refresh when users change videos in the same tab (YouTube SPA navigation)
+ * - This caused chapters to display stale data from the previous video
+ * - The new method calls InnerTube API which provides fresh data on every extraction
+ *
+ * SOLUTION:
+ * - Extract chapters from playerData.videoDetails.shortDescription via InnerTube /player API
+ * - Parse timestamp-based chapters from description text (e.g., "0:00 Introduction")
+ * - Works perfectly with SPA navigation since we call the API fresh each time
+ *
+ * This file is kept for historical reference only.
+ * Do NOT use these functions in new code.
+ *
+ * ────────────────────────────────────────────────────────────────────────────
+ *
+ * OLD DOCUMENTATION (for reference):
  *
  * Extracts video chapters/timestamps from YouTube's ytInitialData object.
  * As a Chrome extension content script, we have direct access to the page's
@@ -236,6 +258,9 @@ function extractChaptersFromMarkers(markers: ChapterMarker[]): Chapter[] {
 
 /**
  * Extract video chapters from YouTube page
+ *
+ * @deprecated DO NOT USE - This function is deprecated!
+ * Use extractChaptersFromInnerTubeDescription() from youtubeTranscriptFast.ts instead.
  *
  * Main public function - call this to get chapters.
  * Accesses ytInitialData from page context with retry logic to handle timing issues.
