@@ -1,4 +1,5 @@
 import type { VideoContext } from "~types/transcript"
+import { buildTranscriptFromSegments } from "./transcriptUtils"
 
 export const SYSTEM_PROMPT = "You are a helpful and friendly assistant."
 
@@ -11,6 +12,8 @@ export function buildSystemPrompt(context?: VideoContext): string {
     return SYSTEM_PROMPT
   }
 
+  const transcript = buildTranscriptFromSegments(context.transcriptSegments || [])
+
   return `You are a helpful and friendly AI assistant specializing in discussing YouTube videos.
 
 You are currently helping the user understand and discuss the following YouTube video:
@@ -18,7 +21,7 @@ You are currently helping the user understand and discuss the following YouTube 
 **Video Title:** ${context.title}
 
 **Full Transcript:**
-${context.transcript}
+${transcript}
 
 Your role is to:
 - Answer questions about the video content based on the transcript

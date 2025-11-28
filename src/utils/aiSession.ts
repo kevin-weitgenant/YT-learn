@@ -3,6 +3,7 @@ import type { TokenInfo } from "../types/message"
 import type { VideoContext } from "../types/transcript"
 import { AI_CONFIG } from "./constants"
 import { createSystemPrompt } from "./systemPrompt"
+import { useChapterStore } from "../stores/chapterStore"
 
 interface AISessionResult {
   session: LanguageModelSession
@@ -11,6 +12,7 @@ interface AISessionResult {
 
 /**
  * Creates and initializes a new AI model session.
+ * Updates chapterStore based on transcript truncation.
  * @param videoContext The video context to be used for the system prompt.
  * @returns A promise that resolves to an object containing the new session and token information.
  * @throws Will throw an error if the LanguageModel API is not available or if session creation fails.
@@ -32,8 +34,19 @@ export async function createAISession(
   console.timeEnd("AI Session Creation")
 
   console.time("System Prompt Appending")
-  const systemPrompt = await createSystemPrompt(videoContext, session)
+  const { systemPrompt, wasTruncated, includedChapterIndices } =
+    await createSystemPrompt(videoContext, session)
   console.timeEnd("System Prompt Appending")
+
+  // Update chapter selection if truncation occurred
+  if (wasTruncated && videoContext.chapters && videoContext.chapters.length > 0) {
+    console.log(
+      `🔄 Updating chapter selection due to truncation (${includedChapterIndices.length}/${videoContext.chapters.length} chapters included)`
+    )
+    useChapterStore.setState({
+      selectedChapters: includedChapterIndices
+    })
+  }
 
   console.time("Token Usage Measurement")
   const systemTokenCount = await session.measureInputUsage(systemPrompt)

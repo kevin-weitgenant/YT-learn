@@ -1,5 +1,6 @@
 import type { VideoContext } from "~types/transcript"
 import type { Concept } from "./quizSchema"
+import { buildTranscriptFromSegments } from "~utils/transcriptUtils"
 
 export const QUIZ_GENERATOR_SYSTEM_PROMPT = `You are a quiz generation assistant. You create clear, educational true/false questions that test understanding of concepts.
 
@@ -30,13 +31,15 @@ Return ONLY the JSON array of questions with their explanations.`
 }
 
 export function generateConceptPrompt(videoContext: VideoContext): string {
+  const transcript = buildTranscriptFromSegments(videoContext.transcriptSegments || [])
+
   return `Extract ALL key concepts from the following video transcript. For each concept, provide a concise title and a detailed description that explains the concept thoroughly.
 
 Video: "${videoContext.title}"
 Channel: ${videoContext.channel}
 
 Transcript:
-${videoContext.transcript}
+${transcript}
 
 For each key concept, return an object with:
 - id: sequential number starting from 1

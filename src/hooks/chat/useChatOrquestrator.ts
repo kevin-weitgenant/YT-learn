@@ -14,8 +14,10 @@ export function useChatOrquestrator(videoContext: VideoContext | null) {
   const messages = useChatStore((state) => state.messages)
   const session = useChatStore((state) => state.session)
 
-  // transcript comes from videoContext, not store
-  const transcript = videoContext?.transcript
+  // Check if transcriptSegments exist and are non-empty
+  const hasTranscript =
+    videoContext?.transcriptSegments &&
+    videoContext.transcriptSegments.length > 0
 
   // 1. Model availability (updates store directly)
   useModelAvailability()
@@ -23,7 +25,7 @@ export function useChatOrquestrator(videoContext: VideoContext | null) {
   // 2. AI session management (updates store directly)
   useAISession({
     videoContext,
-    shouldInitialize: availability === "available" && !!transcript
+    shouldInitialize: availability === "available" && hasTranscript
   })
 
   // 3. Message streaming (pass session)

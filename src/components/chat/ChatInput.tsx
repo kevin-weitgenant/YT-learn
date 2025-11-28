@@ -64,7 +64,7 @@ export function ChatInput() {
       {/* Main input container */}
       <div className="max-w-4xl mx-auto">
         <div className="relative bg-white rounded-2xl shadow-lg shadow-gray-200/50 border border-gray-200 transition-all duration-200 hover:shadow-xl hover:shadow-gray-200/60 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-400">
-          {chapters && chapters.length > 0 && (
+          {chapters && chapters.length > 0 && isSessionReady && (
             <div className="">
               <ChapterSelectionHeader variant="compact" />
             </div>
