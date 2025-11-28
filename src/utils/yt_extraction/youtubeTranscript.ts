@@ -165,6 +165,24 @@ function getVideoMetadata(): {
 }
 
 /**
+ * DOM-based YouTube Transcript Extraction (FALLBACK METHOD)
+ *
+ * TODO: This method currently only extracts `transcript: string` without timing information.
+ * It should be updated to also extract `transcriptSegments: TranscriptSegment[]` for consistency.
+ *
+ * Current behavior:
+ * - Returns VideoContext with `transcript?: string` only
+ * - No `transcriptSegments` field populated
+ * - Used as fallback when InnerTube API fails (~5% of cases)
+ *
+ * Required changes:
+ * 1. Parse transcript XML/data to extract timing information
+ * 2. Create TranscriptSegment[] array with start, duration, text
+ * 3. Return both transcript and transcriptSegments in VideoContext
+ *
+ * Note: This is low priority since InnerTube API succeeds ~95% of the time.
+ *
+ * ---
  * Main function to extract YouTube video context
  * Extracts transcript and metadata, returns VideoContext object
  */

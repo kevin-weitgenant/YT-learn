@@ -101,12 +101,18 @@ export async function extractYouTubeContextHybrid(): Promise<VideoContext> {
       console.log('[Transcript] 📑 Chapter titles:', chapters.map(c => c.title));
     }
 
+    if (result.transcriptSegments) {
+      console.log(`[Transcript] 🕒 Extracted ${result.transcriptSegments.length} transcript segments with timing info`);
+      // Log first few segments for verification
+      console.log('[Transcript] 🔍 First 3 segments:', result.transcriptSegments.slice(0, 3));
+    }
+
     const totalDuration = Date.now() - overallStart;
     console.log(`[Transcript] 🎉 Hybrid extraction completed in ${totalDuration}ms via FAST method`);
 
     return {
       videoId,
-      transcript: result.transcript,
+      transcriptSegments: result.transcriptSegments,
       title,
       url,
       channel,
@@ -127,7 +133,9 @@ export async function extractYouTubeContextHybrid(): Promise<VideoContext> {
     try {
       const fallbackStart = Date.now();
 
-      // Use existing DOM scraping method
+      // TODO: DOM method doesn't extract transcriptSegments yet
+      // This means videos using fallback won't have timing information
+      // See youtubeTranscript.ts for required changes
       const videoContext = await extractYouTubeContext();
 
       // Extract chapters from InnerTube API description
