@@ -144,9 +144,9 @@ export function useStreamingResponse(session: LanguageModelSession | null) {
       ) {
         const { tokenInfo } = useChatStore.getState()
         const systemTokens = tokenInfo.systemTokens
-        const conversationTokens = session.inputUsage ?? 0
+        const totalTokens = session.inputUsage ?? 0 // Already includes system + conversation
+        const conversationTokens = totalTokens - systemTokens // Derive conversation portion
         const quota = session.inputQuota ?? 0
-        const totalTokens = systemTokens + conversationTokens
         const percentageUsed = quota > 0 ? (totalTokens / quota) * 100 : 0
 
         console.log("📊 [TOKEN TRACKING - After Message]")

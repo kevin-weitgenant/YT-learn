@@ -55,9 +55,9 @@ export async function createAISession(
   const tokenInfo: TokenInfo = {
     systemTokens: systemTokenCount,
     conversationTokens: 0,
-    totalTokens: systemTokenCount,
+    totalTokens: session.inputUsage ?? systemTokenCount, // Use actual session value
     inputQuota: session.inputQuota || 0,
-    percentageUsed: (systemTokenCount / (session.inputQuota || 1)) * 100
+    percentageUsed: ((session.inputUsage ?? systemTokenCount) / (session.inputQuota || 1)) * 100
   }
 
   return { session, tokenInfo }
