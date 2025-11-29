@@ -1,22 +1,142 @@
 import { Minimize2 } from "lucide-react"
+import { useState, useEffect, useCallback } from "react"
 import { useChapterStore } from "~stores/chapterStore"
+import { useChatStore } from "~stores/chatStore"
+import { validateAndTruncateSelection } from "~utils/transcriptValidator"
 
 export function ChapterSelectionPanel() {
-  // Get state and actions from Zustand store
+  // Get state from Zustand stores
   const chapters = useChapterStore((state) => state.chapters)
-  const selectedChapters = useChapterStore((state) => state.selectedChapters)
-  const rangeInput = useChapterStore((state) => state.rangeInput)
-  const toggleChapter = useChapterStore((state) => state.toggleChapter)
+  const storeSelectedChapters = useChapterStore((state) => state.selectedChapters)
+  const setSelectedChapters = useChapterStore((state) => state.setSelectedChapters)
   const togglePanel = useChapterStore((state) => state.togglePanel)
-  const selectAll = useChapterStore((state) => state.selectAll)
-  const deselectAll = useChapterStore((state) => state.deselectAll)
   const setRangeInput = useChapterStore((state) => state.setRangeInput)
-  const applyRange = useChapterStore((state) => state.applyRange)
-  const handleRangeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value
-    setRangeInput(newValue)
-    applyRange(newValue)
-  }
+
+  const videoContext = useChatStore((state) => state.videoContext)
+  const session = useChatStore((state) => state.session)
+
+  // Local state for buffered selections
+  const [localSelectedChapters, setLocalSelectedChapters] = useState<number[]>([])
+  const [rangeInput, setLocalRangeInput] = useState("")
+  const [validationInProgress, setValidationInProgress] = useState(false)
+
+  // Initialize local state from store on mount
+  useEffect(() => {
+    setLocalSelectedChapters(storeSelectedChapters)
+  }, [storeSelectedChapters])
+
+  // Real-time validation when local selection changes
+  const validateSelection = useCallback(
+    async (newSelection: number[]) => {
+      if (!videoContext || !session) {
+        // No validation possible yet, just update local state
+        setLocalSelectedChapters(newSelection)
+        return
+      }
+
+      setValidationInProgress(true)
+
+      try {
+        const result = await validateAndTruncateSelection(
+          videoContext,
+          newSelection,
+          session
+        )
+
+        // Update local state with validated (possibly truncated) selection
+        setLocalSelectedChapters(result.validIndices)
+
+        // Optional: Show feedback if truncation occurred
+        if (result.wasTruncated && result.removedIndices.length > 0) {
+          console.log(
+            `⚠️ Chapters ${result.removedIndices.map(i => i + 1).join(", ")} removed (context limit)`
+          )
+        }
+      } catch (error) {
+        console.error("Validation failed:", error)
+        // On error, keep the selection as-is
+        setLocalSelectedChapters(newSelection)
+      } finally {
+        setValidationInProgress(false)
+      }
+    },
+    [videoContext, session]
+  )
+
+  // Local handlers that update local state + validate
+  const handleToggleChapter = useCallback(
+    (chapterIndex: number) => {
+      const newSelection = localSelectedChapters.includes(chapterIndex)
+        ? localSelectedChapters.filter((i) => i !== chapterIndex)
+        : [...localSelectedChapters, chapterIndex]
+
+      validateSelection(newSelection)
+    },
+    [localSelectedChapters, validateSelection]
+  )
+
+  const handleSelectAll = useCallback(() => {
+    const allIndices = Array.from({ length: chapters.length }, (_, i) => i)
+    validateSelection(allIndices)
+  }, [chapters.length, validateSelection])
+
+  const handleDeselectAll = useCallback(() => {
+    validateSelection([])
+  }, [validateSelection])
+
+  const handleApplyRange = useCallback(
+    (rangeValue: string) => {
+      const selected = new Set<number>()
+      const ranges = rangeValue.split(",")
+      const totalChapters = chapters.length
+
+      ranges.forEach((range) => {
+        const parts = range.trim().split("-")
+        if (parts.length === 1 && parts[0]) {
+          // Single number (e.g., "3")
+          const num = parseInt(parts[0], 10) - 1
+          if (!isNaN(num) && num >= 0 && num < totalChapters) {
+            selected.add(num)
+          }
+        } else if (parts.length === 2) {
+          // Range (e.g., "1-3")
+          const start = parseInt(parts[0], 10) - 1
+          const end = parseInt(parts[1], 10) - 1
+          if (!isNaN(start) && !isNaN(end)) {
+            for (
+              let i = Math.min(start, end);
+              i <= Math.max(start, end);
+              i++
+            ) {
+              if (i >= 0 && i < totalChapters) {
+                selected.add(i)
+              }
+            }
+          }
+        }
+      })
+
+      validateSelection(Array.from(selected))
+    },
+    [chapters.length, validateSelection]
+  )
+  const handleRangeChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = e.target.value
+      setLocalRangeInput(newValue)
+      setRangeInput(newValue) // Keep store in sync for persistence
+      handleApplyRange(newValue)
+    },
+    [setRangeInput, handleApplyRange]
+  )
+
+  // Sync local state to store when minimizing panel
+  const handleMinimize = useCallback(() => {
+    // Commit local selection to store
+    setSelectedChapters(localSelectedChapters)
+    // Close panel
+    togglePanel()
+  }, [localSelectedChapters, setSelectedChapters, togglePanel])
 
   return (
     <div className="h-full flex flex-col bg-gray-50 overflow-hidden border-l border-gray-200">
@@ -26,22 +146,29 @@ export function ChapterSelectionPanel() {
             Select Context
           </h2>
           <button
-            onClick={togglePanel}
+            onClick={handleMinimize}
             className="p-1 rounded-md hover:bg-gray-200 transition-colors"
-            title="Minimize">
+            title="Minimize"
+            disabled={validationInProgress}>
             <Minimize2 size={16} />
           </button>
         </div>
 
+        <div className="text-xs text-gray-600 mb-2">
+          {localSelectedChapters.length} / {chapters.length} chapters selected
+        </div>
+
         <div className="grid grid-cols-2 gap-2 mb-2">
           <button
-            onClick={selectAll}
-            className="bg-white border border-gray-200 text-gray-700 text-xs py-1 h-6 rounded-md hover:bg-gray-50 hover:text-gray-900 transition-colors">
+            onClick={handleSelectAll}
+            disabled={validationInProgress}
+            className="bg-white border border-gray-200 text-gray-700 text-xs py-1 h-6 rounded-md hover:bg-gray-50 hover:text-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
             All
           </button>
           <button
-            onClick={deselectAll}
-            className="bg-white border border-gray-200 text-gray-700 text-xs py-1 h-6 rounded-md hover:bg-gray-50 hover:text-gray-900 transition-colors">
+            onClick={handleDeselectAll}
+            disabled={validationInProgress}
+            className="bg-white border border-gray-200 text-gray-700 text-xs py-1 h-6 rounded-md hover:bg-gray-50 hover:text-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
             None
           </button>
         </div>
@@ -65,15 +192,16 @@ export function ChapterSelectionPanel() {
         <div className="absolute inset-0 overflow-y-auto">
           <div className="p-2">
             {chapters.map((chapter, index) => {
-              const isSelected = selectedChapters.includes(index)
+              const isSelected = localSelectedChapters.includes(index)
               return (
                 <div
                   key={index}
                   className={`
                     relative flex items-center space-x-2 py-1 px-2 rounded cursor-pointer transition-all duration-150 hover:bg-gray-100 group
                     ${isSelected ? "bg-blue-50/50" : ""}
+                    ${validationInProgress ? "opacity-50 pointer-events-none" : ""}
                   `}
-                  onClick={() => toggleChapter(index)}>
+                  onClick={() => handleToggleChapter(index)}>
                   {/* Selection indicator bar */}
                   {isSelected && (
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-r" />

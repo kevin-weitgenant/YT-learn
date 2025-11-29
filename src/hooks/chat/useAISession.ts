@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import type { Message } from "../../types/message"
 import type { VideoContext } from "../../types/transcript"
 import { useChatStore } from "../../stores/chatStore"
+import { useChapterStore } from "../../stores/chapterStore"
 import { ERROR_MESSAGES } from "../../utils/constants"
 import { createAISession } from "../../utils/aiSession"
 
@@ -21,6 +22,7 @@ export function useAISession({
   shouldInitialize
 }: UseAISessionProps) {
   const [resetCount, setResetCount] = useState(0)
+  const selectedChapters = useChapterStore((state) => state.selectedChapters)
 
   const handleError = (message: string, error?: unknown) => {
     console.error(message, error)
@@ -49,7 +51,12 @@ export function useAISession({
       useChatStore.setState({ session: null, isSessionReady: false })
 
       try {
-        const { session, tokenInfo } = await createAISession(videoContext)
+        const { session, tokenInfo } = await createAISession(
+          videoContext,
+          videoContext.chapters && videoContext.chapters.length > 0
+            ? selectedChapters
+            : undefined
+        )
 
         if (isCancelled) {
           session.destroy()
@@ -77,7 +84,7 @@ export function useAISession({
       session?.destroy()
       useChatStore.setState({ session: null, isSessionReady: false })
     }
-  }, [shouldInitialize, videoContext, resetCount])
+  }, [shouldInitialize, videoContext, resetCount, selectedChapters])
 
   const resetSession = () => {
     const { setMessages } = useChatStore.getState()

@@ -14,11 +14,13 @@ interface AISessionResult {
  * Creates and initializes a new AI model session.
  * Updates chapterStore based on transcript truncation.
  * @param videoContext The video context to be used for the system prompt.
+ * @param selectedChapterIndices Optional array of chapter indices to include in context.
  * @returns A promise that resolves to an object containing the new session and token information.
  * @throws Will throw an error if the LanguageModel API is not available or if session creation fails.
  */
 export async function createAISession(
-  videoContext: VideoContext
+  videoContext: VideoContext,
+  selectedChapterIndices?: number[]
 ): Promise<AISessionResult> {
   if (!("LanguageModel" in self)) {
     throw new Error("LanguageModel API not available.")
@@ -35,17 +37,24 @@ export async function createAISession(
 
   console.time("System Prompt Appending")
   const { systemPrompt, wasTruncated, includedChapterIndices } =
-    await createSystemPrompt(videoContext, session)
+    await createSystemPrompt(videoContext, session, selectedChapterIndices)
   console.timeEnd("System Prompt Appending")
 
   // Update chapter selection if truncation occurred
+  // Only update if we're not using manual chapter selection, or if the included chapters differ
   if (wasTruncated && videoContext.chapters && videoContext.chapters.length > 0) {
-    console.log(
-      `🔄 Updating chapter selection due to truncation (${includedChapterIndices.length}/${videoContext.chapters.length} chapters included)`
-    )
-    useChapterStore.setState({
-      selectedChapters: includedChapterIndices
-    })
+    const shouldUpdate =
+      selectedChapterIndices === undefined ||
+      JSON.stringify(includedChapterIndices) !== JSON.stringify(selectedChapterIndices)
+
+    if (shouldUpdate) {
+      console.log(
+        `🔄 Updating chapter selection due to truncation (${includedChapterIndices.length}/${videoContext.chapters.length} chapters included)`
+      )
+      useChapterStore.setState({
+        selectedChapters: includedChapterIndices
+      })
+    }
   }
 
   console.time("Token Usage Measurement")

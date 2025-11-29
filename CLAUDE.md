@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Nano Tutor is a Chrome extension that enables interactive chat with YouTube videos using the built-in Gemini Nano AI (Chrome's on-device AI). The extension uses Plasmo framework for Chrome extension development with React 19.
 
 **Key Technologies:**
+
 - **Framework**: Plasmo (Chrome extension framework)
 - **UI**: React 19
 - **State Management**: Zustand
@@ -21,18 +22,19 @@ For safety and consistency, the AI must never run `pnpm dev`, `pnpm dev:plain`, 
 
 ### Core Components
 
-| Component | Path | Purpose |
-|-----------|------|---------|
-| Background Script | `src/background/index.ts` | Sidepanel lifecycle, tab management |
-| Sidepanel | `src/sidepanel.tsx` | Main UI entry point |
-| Chat Orchestrator | `src/hooks/chat/useChatOrquestrator.ts` | Coordinates AI session & streaming |
-| Video Context Hook | `src/hooks/videoContext/` | Extract/retrieve video data |
-| Chat Store | `src/stores/chatStore.ts` | Messages, session, model state |
-| Chapter Store | `src/stores/chapterStore.ts` | Chapter selection state |
+| Component          | Path                                    | Purpose                             |
+| ------------------ | --------------------------------------- | ----------------------------------- |
+| Background Script  | `src/background/index.ts`               | Sidepanel lifecycle, tab management |
+| Sidepanel          | `src/sidepanel.tsx`                     | Main UI entry point                 |
+| Chat Orchestrator  | `src/hooks/chat/useChatOrquestrator.ts` | Coordinates AI session & streaming  |
+| Video Context Hook | `src/hooks/videoContext/`               | Extract/retrieve video data         |
+| Chat Store         | `src/stores/chatStore.ts`               | Messages, session, model state      |
+| Chapter Store      | `src/stores/chapterStore.ts`            | Chapter selection state             |
 
 ### Storage Strategy
 
 **Two-Tier Approach:**
+
 - **Session Storage** (`chrome.storage.session`): Tab → Video ID mapping (cleared on tab close)
 - **Local Storage** (`chrome.storage.local`): Video context caching (~50-500KB per video, keeps most recent 3)
 
@@ -59,11 +61,13 @@ See [docs/architecture/overview.md](docs/architecture/overview.md) for detailed 
 **For detailed documentation, see the [docs/](docs/) directory.**
 
 ### Architecture
+
 - **[overview.md](docs/architecture/overview.md)** - System architecture, data flow, sequence diagrams
 - **[storage.md](docs/architecture/storage.md)** - Two-tier storage strategy, caching, cleanup
 - **[design-patterns.md](docs/architecture/design-patterns.md)** - Hook composition, async action injection, streaming
 
 ### Components
+
 - **[background.md](docs/components/background.md)** - Background script, event listeners, message handlers
 - **[hooks.md](docs/components/hooks.md)** - Chat & video context hooks, orchestration patterns
 - **[stores.md](docs/components/stores.md)** - Zustand stores, action injection, subscriptions
@@ -71,6 +75,7 @@ See [docs/architecture/overview.md](docs/architecture/overview.md) for detailed 
 - **[yt-extraction.md](docs/components/yt-extraction.md)** - Transcript/chapter extraction, hybrid approach
 
 ### Guides
+
 - **[development.md](docs/guides/development.md)** - Setup, debugging, testing, troubleshooting
 - **[contributing.md](docs/guides/contributing.md)** - Adding features, following patterns, code organization
 
@@ -124,13 +129,7 @@ const quota = session.maxTokens
 
 Details: [docs/architecture/design-patterns.md](docs/architecture/design-patterns.md)
 
-## Planning Approach
-
-When creating implementation plans:
-- **Focus on high-level architecture** - Describe system interactions, component responsibilities, and data flow patterns
-- **Use technical English** - Write clear, professional architectural descriptions rather than implementation details
-- **Minimize code examples** - Include code only when essential to illustrate a specific pattern or API usage
-- **Explain file changes** - State what files are being changed and why, in plain English (e.g., "Update `chatStore.ts` to add session persistence logic")
+## 
 
 ## Testing
 

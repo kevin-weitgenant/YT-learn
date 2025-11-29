@@ -14,6 +14,7 @@ interface ChapterStore {
 
   // Actions
   setChapters: (chapters: Chapter[]) => void
+  setSelectedChapters: (indices: number[]) => void
   togglePanel: () => void
   toggleChapter: (chapterIndex: number) => void
   selectAll: () => void
@@ -48,6 +49,9 @@ export const useChapterStore = create<ChapterStore>((set, get) => ({
       )
       return { chapters, selectedChapters }
     }),
+
+  setSelectedChapters: (indices: number[]) =>
+    set({ selectedChapters: indices }),
 
   togglePanel: () => set((state) => ({ showPanel: !state.showPanel })),
 
