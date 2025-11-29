@@ -205,9 +205,10 @@ export async function extractYouTubeContext(): Promise<VideoContext> {
     }
 
     // Return the complete context
+    // Note: This fallback method currently doesn't extract transcriptSegments
+    // TODO: Parse segment timing information from DOM for complete compatibility
     return {
       videoId,
-      transcript,
       title,
       url,
       channel,

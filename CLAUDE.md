@@ -124,6 +124,14 @@ const quota = session.maxTokens
 
 Details: [docs/architecture/design-patterns.md](docs/architecture/design-patterns.md)
 
+## Planning Approach
+
+When creating implementation plans:
+- **Focus on high-level architecture** - Describe system interactions, component responsibilities, and data flow patterns
+- **Use technical English** - Write clear, professional architectural descriptions rather than implementation details
+- **Minimize code examples** - Include code only when essential to illustrate a specific pattern or API usage
+- **Explain file changes** - State what files are being changed and why, in plain English (e.g., "Update `chatStore.ts` to add session persistence logic")
+
 ## Testing
 
 - **Current approach**: Manual testing only

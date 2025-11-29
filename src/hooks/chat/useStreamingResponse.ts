@@ -74,7 +74,7 @@ export function useStreamingResponse(session: LanguageModelSession | null) {
       displayText?: string
     }
   ) => {
-    const { isStreaming, addMessage } = useChatStore.getState()
+    const { isStreaming, addMessage, setInputText } = useChatStore.getState()
     if (!text.trim() || isStreaming || !session) return
 
     console.log("📤 [BEFORE SENDING MESSAGE]")
@@ -88,6 +88,9 @@ export function useStreamingResponse(session: LanguageModelSession | null) {
       sender: "user"
     }
     addMessage(userMessage)
+    
+    // Clear the input text after adding the message
+    setInputText("")
 
     useChatStore.setState({ isStreaming: true })
     streamingMessageRef.current = ""

@@ -32,3 +32,16 @@ export interface Chapter {
   startSeconds: number
 }
 
+/**
+ * Transcript Segment Interface
+ * Represents a single transcript segment with timing information
+ */
+export interface TranscriptSegment {
+  /** The transcript text content */
+  text: string
+  /** Start time in seconds */
+  start: number
+  /** Duration in seconds */
+  duration: number
+}
+
