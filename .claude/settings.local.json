@@ -4,7 +4,8 @@
       "Bash(dir:*)",
       "Bash(findstr:*)",
       "WebSearch",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": [],
     "ask": []

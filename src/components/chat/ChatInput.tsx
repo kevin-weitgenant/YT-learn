@@ -3,7 +3,7 @@ import { useChatStore } from "../../stores/chatStore"
 import { useStreamingResponse } from "../../hooks/chat/useStreamingResponse"
 import { useAISession } from "../../hooks/chat/useAISession"
 import { CircularProgress } from "./ui/CircularProgress"
-import { ChapterSelectionHeader } from "./chapters/ChapterSelectionHeader"
+import { ChapterSelectionHeader } from "./chapters/components/ChapterSelectionHeader"
 import { useChapterStore } from "../../stores/chapterStore"
 
 /**

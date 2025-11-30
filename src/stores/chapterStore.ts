@@ -1,5 +1,6 @@
 import { create } from "zustand"
 import type { Chapter } from "~types/transcript"
+import { parseChapterRange, indicesToRangeString } from "~utils/chapterRangeParser"
 
 interface ChapterStore {
   // State
@@ -47,7 +48,9 @@ export const useChapterStore = create<ChapterStore>((set, get) => ({
         { length: chapters.length },
         (_, i) => i
       )
-      return { chapters, selectedChapters }
+      // Initialize range input to reflect default selection
+      const rangeInput = indicesToRangeString(selectedChapters)
+      return { chapters, selectedChapters, rangeInput }
     }),
 
   setSelectedChapters: (indices: number[]) =>
@@ -74,37 +77,8 @@ export const useChapterStore = create<ChapterStore>((set, get) => ({
   applyRange: (rangeValue?: string) =>
     set((state) => {
       const rangeToUse = rangeValue !== undefined ? rangeValue : state.rangeInput
-      const selected = new Set<number>()
-      const ranges = rangeToUse.split(",")
-      const totalChapters = state.chapters.length
-
-      ranges.forEach((range) => {
-        const parts = range.trim().split("-")
-        if (parts.length === 1 && parts[0]) {
-          // Single number (e.g., "3")
-          const num = parseInt(parts[0], 10) - 1
-          if (!isNaN(num) && num >= 0 && num < totalChapters) {
-            selected.add(num)
-          }
-        } else if (parts.length === 2) {
-          // Range (e.g., "1-3")
-          const start = parseInt(parts[0], 10) - 1
-          const end = parseInt(parts[1], 10) - 1
-          if (!isNaN(start) && !isNaN(end)) {
-            for (
-              let i = Math.min(start, end);
-              i <= Math.max(start, end);
-              i++
-            ) {
-              if (i >= 0 && i < totalChapters) {
-                selected.add(i)
-              }
-            }
-          }
-        }
-      })
-
-      return { selectedChapters: Array.from(selected) }
+      const selected = parseChapterRange(rangeToUse, state.chapters.length)
+      return { selectedChapters: selected }
     }),
 
   reset: () =>

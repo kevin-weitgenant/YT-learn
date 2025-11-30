@@ -34,3 +34,6 @@ dist/
 tsconfig.tsbuildinfo
 .claude/settings.local.json
 .claude
+.claude/settings.local.json
+nul
+nul

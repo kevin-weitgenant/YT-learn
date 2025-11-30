@@ -4,6 +4,7 @@ import type { VideoContext } from "../types/transcript"
 import { AI_CONFIG } from "./constants"
 import { createSystemPrompt } from "./systemPrompt"
 import { useChapterStore } from "../stores/chapterStore"
+import { indicesToRangeString } from "./chapterRangeParser"
 
 interface AISessionResult {
   session: LanguageModelSession
@@ -52,7 +53,8 @@ export async function createAISession(
         `🔄 Updating chapter selection due to truncation (${includedChapterIndices.length}/${videoContext.chapters.length} chapters included)`
       )
       useChapterStore.setState({
-        selectedChapters: includedChapterIndices
+        selectedChapters: includedChapterIndices,
+        rangeInput: indicesToRangeString(includedChapterIndices)
       })
     }
   }
