@@ -1,81 +1,70 @@
-import { useState, useEffect, useCallback } from "react"
+import { useCallback, useEffect } from "react"
 import { useChapterStore } from "~stores/chapterStore"
 import { useChatStore } from "~stores/chatStore"
 import { useChapterValidation } from "./useChapterValidation"
 import { indicesToRangeString } from "~utils/chapterRangeParser"
 
 export function useChapterSelection() {
-  const chapters = useChapterStore((state) => state.chapters)
-  const storeSelectedChapters = useChapterStore((state) => state.selectedChapters)
-  const setSelectedChapters = useChapterStore((state) => state.setSelectedChapters)
-  const setRangeInput = useChapterStore((state) => state.setRangeInput)
-  const togglePanel = useChapterStore((state) => state.togglePanel)
-
   const videoContext = useChatStore((state) => state.videoContext)
   const session = useChatStore((state) => state.session)
-
-  // Local state for buffered selections
-  const [localSelectedChapters, setLocalSelectedChapters] = useState<number[]>([])
-
-  // Initialize local state from store on mount
-  useEffect(() => {
-    setLocalSelectedChapters(storeSelectedChapters)
-  }, [storeSelectedChapters])
 
   const { validationInProgress, validateSelection } = useChapterValidation(
     videoContext,
     session
   )
 
-  // Wrapper to update local state after validation
-  const handleValidation = useCallback(
-    (indices: number[]) => {
-      validateSelection(indices, (validIndices) => {
-        setLocalSelectedChapters(validIndices)
-        // Sync range input to reflect current selection
-        setRangeInput(indicesToRangeString(validIndices))
+  const handleToggleChapter = useCallback(
+    async (chapterIndex: number) => {
+      // Read current draft from store
+      const currentDraft = useChapterStore.getState().draftSelectedChapters
+
+      // Calculate new selection
+      const newSelection = currentDraft.includes(chapterIndex)
+        ? currentDraft.filter((i) => i !== chapterIndex)
+        : [...currentDraft, chapterIndex].sort((a, b) => a - b)
+
+      // Validate and update if valid
+      await validateSelection(newSelection, (validIndices) => {
+        useChapterStore.getState().setDraft(validIndices)
+        // Sync range input
+        useChapterStore.getState().setRangeInput(indicesToRangeString(validIndices))
       })
     },
-    [validateSelection, setRangeInput]
+    [validateSelection]
   )
 
-  const handleToggleChapter = useCallback(
-    (chapterIndex: number) => {
-      const newSelection = localSelectedChapters.includes(chapterIndex)
-        ? localSelectedChapters.filter((i) => i !== chapterIndex)
-        : [...localSelectedChapters, chapterIndex]
-
-      handleValidation(newSelection)
-    },
-    [localSelectedChapters, handleValidation]
-  )
-
-  const handleSelectAll = useCallback(() => {
+  const handleSelectAll = useCallback(async () => {
+    const chapters = useChapterStore.getState().chapters
     const allIndices = Array.from({ length: chapters.length }, (_, i) => i)
-    handleValidation(allIndices)
-  }, [chapters.length, handleValidation])
 
-  const handleDeselectAll = useCallback(() => {
-    handleValidation([])
-  }, [handleValidation])
+    await validateSelection(allIndices, (validIndices) => {
+      useChapterStore.getState().setDraft(validIndices)
+      useChapterStore.getState().setRangeInput(indicesToRangeString(validIndices))
+    })
+  }, [validateSelection])
+
+  const handleDeselectAll = useCallback(async () => {
+    await validateSelection([], (validIndices) => {
+      useChapterStore.getState().setDraft(validIndices)
+      useChapterStore.getState().setRangeInput(indicesToRangeString(validIndices))
+    })
+  }, [validateSelection])
 
   const handleApplyRange = useCallback(
-    (indices: number[]) => {
-      handleValidation(indices)
+    async (indices: number[]) => {
+      await validateSelection(indices, (validIndices) => {
+        useChapterStore.getState().setDraft(validIndices)
+        useChapterStore.getState().setRangeInput(indicesToRangeString(validIndices))
+      })
     },
-    [handleValidation]
+    [validateSelection]
   )
 
-  // Sync local state to store when minimizing panel
   const handleMinimize = useCallback(() => {
-    // Commit local selection to store
-    setSelectedChapters(localSelectedChapters)
-    // Close panel
-    togglePanel()
-  }, [localSelectedChapters, setSelectedChapters, togglePanel])
+    useChapterStore.getState().commitDraft()
+  }, [])
 
   return {
-    localSelectedChapters,
     validationInProgress,
     handleToggleChapter,
     handleSelectAll,

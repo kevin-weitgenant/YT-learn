@@ -12,7 +12,8 @@
 # misc
 .DS_Store
 *.pem
-
+*.tsbuildinfo
+tsconfig.tsbuildinfo
 # debug
 npm-debug.log*
 yarn-debug.log*
@@ -37,3 +38,8 @@ tsconfig.tsbuildinfo
 .claude/settings.local.json
 nul
 nul
+tsconfig.tsbuildinfo
+tsconfig.tsbuildinfo
+tsconfig.tsbuildinfo
+tsconfig.tsbuildinfo
+tsconfig.tsbuildinfo

@@ -129,7 +129,132 @@ const quota = session.maxTokens
 
 Details: [docs/architecture/design-patterns.md](docs/architecture/design-patterns.md)
 
-## 
+## State Management Patterns
+
+**CRITICAL: Follow these patterns to prevent unnecessary rerenders and maintain clean component architecture.**
+
+### Zustand Store Subscriptions
+
+1. **Never subscribe in parent and pass as props**
+   ```typescript
+   // ❌ BAD: Subscribing in parent and passing down
+   export function ParentComponent() {
+     const data = useStore((state) => state.data)
+     return <ChildComponent data={data} />
+   }
+
+   // ✅ GOOD: Child subscribes directly
+   export function ParentComponent() {
+     return <ChildComponent />
+   }
+
+   export function ChildComponent() {
+     const data = useStore((state) => state.data)
+     // Use data here
+   }
+   ```
+
+2. **Subscribe as low in the component tree as possible**
+   - Extract child components to isolate store subscriptions
+   - Parent components should subscribe to minimal state
+   - Only subscribe to the exact data you need
+
+3. **Keep selectors simple and primitive**
+   ```typescript
+   // ✅ GOOD: Simple selectors for primitive values
+   const count = useStore((state) => state.items.length)
+   const isActive = useStore((state) => state.active)
+
+   // ❌ BAD: Returning new objects creates infinite loops
+   const data = useStore((state) => ({
+     count: state.items.length,
+     isActive: state.active
+   }))
+   ```
+
+4. **Use separate subscriptions instead of combining**
+   ```typescript
+   // ✅ GOOD: Separate subscriptions
+   const isSelected = useStore((state) => state.selectedIds.includes(id))
+   const handleToggle = useStore((state) => state.handleToggle)
+
+   // ❌ BAD: Combined selector returns new object each time
+   const { isSelected, handleToggle } = useStore((state) => ({
+     isSelected: state.selectedIds.includes(id),
+     handleToggle: state.handleToggle
+   }))
+   ```
+
+5. **Use `getState()` for stable action handlers**
+   ```typescript
+   // ❌ BAD: Subscribes to action function (unnecessary)
+   const handleClick = useStore((state) => state.handleClick)
+
+   // ✅ GOOD: Access action directly without subscription
+   const handleClick = () => {
+     useStore.getState().handleClick()
+   }
+   ```
+
+### Component Splitting Strategy
+
+When a component subscribes to multiple store values, consider splitting it:
+
+```typescript
+// ❌ BAD: Header rerenders when any store value changes
+export function Header() {
+  const valueA = useStore((state) => state.valueA)
+  const valueB = useStore((state) => state.valueB)
+  const valueC = useStore((state) => state.valueC)
+
+  return (
+    <div>
+      <ButtonGroup /> {/* Rerenders unnecessarily */}
+      <DisplayA value={valueA} />
+      <DisplayB value={valueB} />
+      <DisplayC value={valueC} />
+    </div>
+  )
+}
+
+// ✅ GOOD: Each component subscribes to only what it needs
+export function Header() {
+  return (
+    <div>
+      <ButtonGroup /> {/* Never rerenders from store changes */}
+      <DisplayA />
+      <DisplayB />
+      <DisplayC />
+    </div>
+  )
+}
+
+function DisplayA() {
+  const valueA = useStore((state) => state.valueA)
+  return <span>{valueA}</span>
+}
+
+function DisplayB() {
+  const valueB = useStore((state) => state.valueB)
+  return <span>{valueB}</span>
+}
+
+function DisplayC() {
+  const valueC = useStore((state) => state.valueC)
+  return <span>{valueC}</span>
+}
+```
+
+### Examples
+
+See chapter selection components for reference implementation:
+- **ChapterSelectionPanel** (`src/components/chat/chapters/ChapterSelectionPanel.tsx`) - Subscribes only to chapters array for mapping
+- **ChapterPanelHeader** (`src/components/chat/chapters/components/ChapterPanelHeader.tsx`) - No store subscriptions, uses getState() for actions
+- **ChapterRangeInput** (`src/components/chat/chapters/components/ChapterRangeInput.tsx`) - Isolated subscriptions for range input state
+- **ChapterListItem** (`src/components/chat/chapters/components/ChapterListItem.tsx`) - Separate simple selectors
+- **SelectedCountDisplay** (`src/components/chat/chapters/components/SelectedCountDisplay.tsx`) - Simple selectors for primitive lengths
+
+##
 
 ## Testing
 

@@ -1,28 +1,25 @@
 import type { Chapter } from "~types/transcript"
+import { useChapterStore } from "~stores/chapterStore"
+import { useChapterSelection } from "~hooks/chapters/useChapterSelection"
 
 interface ChapterListItemProps {
   chapter: Chapter
   index: number
-  isSelected: boolean
-  disabled: boolean
-  onToggle: (index: number) => void
 }
 
-export function ChapterListItem({
-  chapter,
-  index,
-  isSelected,
-  disabled,
-  onToggle
-}: ChapterListItemProps) {
+export function ChapterListItem({ chapter, index }: ChapterListItemProps) {
+  const isSelected = useChapterStore((state) =>
+    state.draftSelectedChapters.includes(index)
+  )
+  const { handleToggleChapter } = useChapterSelection()
+
   return (
     <div
       className={`
         relative flex items-center space-x-2 py-1 px-2 rounded cursor-pointer transition-all duration-150 hover:bg-gray-100 group
         ${isSelected ? "bg-blue-50/50" : ""}
-        ${disabled ? "opacity-50 pointer-events-none" : ""}
       `}
-      onClick={() => onToggle(index)}>
+      onClick={() => handleToggleChapter(index)}>
       {/* Selection indicator bar */}
       {isSelected && (
         <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-r" />
