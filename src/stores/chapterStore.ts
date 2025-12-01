@@ -1,6 +1,7 @@
 import { create } from "zustand"
 import type { Chapter } from "~types/transcript"
 import { parseChapterRange, indicesToRangeString } from "~utils/chapterRangeParser"
+import type { ChapterTruncationInfo } from "~utils/transcriptValidator"
 
 interface ChapterStore {
   // State
@@ -9,6 +10,7 @@ interface ChapterStore {
   draftSelectedChapters: number[] // Local buffer for panel selection
   showPanel: boolean
   rangeInput: string
+  truncatedChapter: ChapterTruncationInfo | null
 
   // Derived state (computed)
   isAllSelected: () => boolean
@@ -17,6 +19,7 @@ interface ChapterStore {
   // Actions
   setChapters: (chapters: Chapter[]) => void
   setSelectedChapters: (indices: number[]) => void
+  setTruncatedChapter: (info: ChapterTruncationInfo | null) => void
   togglePanel: () => void
   toggleChapter: (chapterIndex: number) => void
   selectAll: () => void
@@ -41,6 +44,7 @@ export const useChapterStore = create<ChapterStore>((set, get) => ({
   draftSelectedChapters: [],
   showPanel: false,
   rangeInput: "",
+  truncatedChapter: null,
 
   // Derived state
   isAllSelected: () => {
@@ -70,6 +74,9 @@ export const useChapterStore = create<ChapterStore>((set, get) => ({
 
   setSelectedChapters: (indices: number[]) =>
     set({ selectedChapters: indices }),
+
+  setTruncatedChapter: (info: ChapterTruncationInfo | null) =>
+    set({ truncatedChapter: info }),
 
   togglePanel: () =>
     set((state) => {
@@ -118,7 +125,7 @@ export const useChapterStore = create<ChapterStore>((set, get) => ({
     set((state) => ({
       draftSelectedChapters: state.draftSelectedChapters.includes(index)
         ? state.draftSelectedChapters.filter((i) => i !== index)
-        : [...state.draftSelectedChapters, index].sort((a, b) => a - b)
+        : [...state.draftSelectedChapters, index] // Don't sort - preserve selection order
     })),
 
   selectAllDraft: () =>
@@ -148,6 +155,7 @@ export const useChapterStore = create<ChapterStore>((set, get) => ({
       selectedChapters: [],
       draftSelectedChapters: [],
       showPanel: false,
-      rangeInput: ""
+      rangeInput: "",
+      truncatedChapter: null
     })
 }))

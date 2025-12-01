@@ -18,10 +18,10 @@ export function useChapterSelection() {
       // Read current draft from store
       const currentDraft = useChapterStore.getState().draftSelectedChapters
 
-      // Calculate new selection
+      // Calculate new selection (preserve selection order, don't sort)
       const newSelection = currentDraft.includes(chapterIndex)
         ? currentDraft.filter((i) => i !== chapterIndex)
-        : [...currentDraft, chapterIndex].sort((a, b) => a - b)
+        : [...currentDraft, chapterIndex]
 
       // Validate and update if valid
       await validateSelection(newSelection, (validIndices) => {

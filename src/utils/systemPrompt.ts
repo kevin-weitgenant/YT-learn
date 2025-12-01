@@ -7,6 +7,7 @@ import {
   findChaptersInRange
 } from "./transcriptUtils"
 import { filterTranscriptSegmentsByChapters } from "./transcriptValidator"
+import { useChapterStore } from "~stores/chapterStore"
 
 interface SystemPromptResult {
   systemPrompt: string
@@ -50,12 +51,16 @@ export async function createSystemPrompt(
       }
     }
 
-    // Filter segments by selected chapters
+    // Filter segments by selected chapters, respecting truncation limits
     if (context.chapters && context.chapters.length > 0) {
+      // Get truncation info from store
+      const truncatedChapter = useChapterStore.getState().truncatedChapter
+
       segmentsToUse = filterTranscriptSegmentsByChapters(
         context.transcriptSegments || [],
         context.chapters,
-        selectedChapterIndices
+        selectedChapterIndices,
+        truncatedChapter
       )
     }
   }

@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react"
 import { validateAndTruncateSelection } from "~utils/transcriptValidator"
+import { useChapterStore } from "~stores/chapterStore"
 import type { VideoContext } from "~types/transcript"
 import type { LanguageModelSession } from "~types/chrome-ai"
 
@@ -8,6 +9,7 @@ export function useChapterValidation(
   session: LanguageModelSession | null
 ) {
   const [validationInProgress, setValidationInProgress] = useState(false)
+  const setTruncatedChapter = useChapterStore((state) => state.setTruncatedChapter)
 
   const validateSelection = useCallback(
     async (
@@ -17,6 +19,7 @@ export function useChapterValidation(
       if (!videoContext || !session) {
         // No validation possible yet, just update local state
         onValidated(newSelection)
+        setTruncatedChapter(null)
         return
       }
 
@@ -32,21 +35,26 @@ export function useChapterValidation(
         // Update local state with validated (possibly truncated) selection
         onValidated(result.validIndices)
 
+        // Store truncation info in chapter store
+        setTruncatedChapter(result.truncatedChapter)
+
         // Optional: Show feedback if truncation occurred
-        if (result.wasTruncated && result.removedIndices.length > 0) {
+        if (result.truncatedChapter) {
+          const { chapterIndex, truncationPercentage } = result.truncatedChapter
           console.log(
-            `⚠️ Chapters ${result.removedIndices.map((i) => i + 1).join(", ")} removed (context limit)`
+            `⚠️ Chapter ${chapterIndex + 1} truncated to ${truncationPercentage}% (context limit)`
           )
         }
       } catch (error) {
         console.error("Validation failed:", error)
         // On error, keep the selection as-is
         onValidated(newSelection)
+        setTruncatedChapter(null)
       } finally {
         setValidationInProgress(false)
       }
     },
-    [videoContext, session]
+    [videoContext, session, setTruncatedChapter]
   )
 
   return {

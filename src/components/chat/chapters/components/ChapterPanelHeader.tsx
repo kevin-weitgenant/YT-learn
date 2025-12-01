@@ -5,6 +5,7 @@ import { SelectedCountDisplay } from "./SelectedCountDisplay"
 import { ChapterRangeInput } from "./ChapterRangeInput"
 
 export function ChapterPanelHeader() {
+  const truncatedChapter = useChapterStore((state) => state.truncatedChapter)
   const {
     validationInProgress,
     handleApplyRange,
@@ -12,6 +13,9 @@ export function ChapterPanelHeader() {
     handleDeselectAll,
     handleMinimize
   } = useChapterSelection()
+
+  // Disable "All" button when truncation is active (context limit reached)
+  const isSelectAllDisabled = validationInProgress || truncatedChapter !== null
 
   return (
     <div className="flex-shrink-0 p-3 border-b border-gray-200">
@@ -35,7 +39,12 @@ export function ChapterPanelHeader() {
       <div className="grid grid-cols-2 gap-2 mb-2">
         <button
           onClick={handleSelectAll}
-          disabled={validationInProgress}
+          disabled={isSelectAllDisabled}
+          title={
+            truncatedChapter !== null
+              ? "Cannot select all - 80% context limit reached"
+              : "Select all chapters"
+          }
           className="bg-white border border-gray-200 text-gray-700 text-xs py-1 h-6 rounded-md hover:bg-gray-50 hover:text-gray-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
           All
         </button>
