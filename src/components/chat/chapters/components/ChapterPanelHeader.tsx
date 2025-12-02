@@ -56,10 +56,7 @@ export function ChapterPanelHeader() {
         </button>
       </div>
 
-      <ChapterRangeInput
-        onApplyRange={handleApplyRange}
-        disabled={validationInProgress}
-      />
+      <ChapterRangeInput onApplyRange={handleApplyRange} />
     </div>
   )
 }

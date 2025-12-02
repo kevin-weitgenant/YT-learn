@@ -6,6 +6,7 @@ import { useChatStore } from "../../stores/chatStore"
 import { useChapterStore } from "../../stores/chapterStore"
 import { ERROR_MESSAGES } from "../../utils/constants"
 import { createAISession } from "../../utils/aiSession"
+import { validateAndTruncateSelection } from "../../utils/transcriptValidator"
 
 interface UseAISessionProps {
   videoContext: VideoContext | null
@@ -69,6 +70,22 @@ export function useAISession({
           isSessionReady: true,
           tokenInfo
         })
+
+        // Validate selection to populate truncation info in store
+        // This ensures the truncation badge shows immediately when chapter panel is opened
+        if (videoContext.chapters && videoContext.chapters.length > 0 && selectedChapters.length > 0) {
+          try {
+            const validationResult = await validateAndTruncateSelection(
+              videoContext,
+              selectedChapters,
+              session
+            )
+            useChapterStore.getState().setTruncatedChapter(validationResult.truncatedChapter)
+          } catch (validationError) {
+            console.warn("Truncation validation failed after session creation:", validationError)
+            // Don't fail session creation if validation fails
+          }
+        }
       } catch (error) {
         if (isCancelled) return
         handleError(ERROR_MESSAGES.SESSION_INIT_FAILED, error)

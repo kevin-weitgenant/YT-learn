@@ -18,8 +18,11 @@ export function ChapterRangeInput({
   const handleRangeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = e.target.value
+
+      // Update input immediately
       setRangeInput(newValue)
 
+      // Parse and validate selection
       const indices = parseChapterRange(newValue, totalCount)
       onApplyRange(indices)
     },

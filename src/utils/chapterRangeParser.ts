@@ -18,10 +18,12 @@ export function parseChapterRange(rangeValue: string, totalChapters: number): nu
         selected.add(num)
       }
     } else if (parts.length === 2) {
-      // Range (e.g., "1-3")
       const start = parseInt(parts[0], 10) - 1
       const end = parseInt(parts[1], 10) - 1
+
+      // Handle incomplete ranges gracefully (e.g., "1-" or "-3")
       if (!isNaN(start) && !isNaN(end)) {
+        // Complete range (e.g., "1-3")
         for (
           let i = Math.min(start, end);
           i <= Math.max(start, end);
@@ -30,6 +32,18 @@ export function parseChapterRange(rangeValue: string, totalChapters: number): nu
           if (i >= 0 && i < totalChapters) {
             selected.add(i)
           }
+        }
+      } else if (!isNaN(start) && isNaN(end)) {
+        // Incomplete range with start only (e.g., "1-")
+        // Treat as single number while user is typing
+        if (start >= 0 && start < totalChapters) {
+          selected.add(start)
+        }
+      } else if (isNaN(start) && !isNaN(end)) {
+        // Incomplete range with end only (e.g., "-3")
+        // Treat as single number while user is typing
+        if (end >= 0 && end < totalChapters) {
+          selected.add(end)
         }
       }
     }

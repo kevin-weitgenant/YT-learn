@@ -54,7 +54,13 @@ export function useChapterSelection() {
     async (indices: number[]) => {
       await validateSelection(indices, (validIndices) => {
         useChapterStore.getState().setDraft(validIndices)
-        useChapterStore.getState().setRangeInput(indicesToRangeString(validIndices))
+
+        // Only update rangeInput if truncation occurred (context limit reached)
+        // This shows the user what actually got selected when their input was too large
+        if (indices.length !== validIndices.length) {
+          useChapterStore.getState().setRangeInput(indicesToRangeString(validIndices))
+        }
+        // Otherwise, preserve the user's typed input (e.g., keep "1-" while typing)
       })
     },
     [validateSelection]
