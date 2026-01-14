@@ -1,7 +1,7 @@
 {
-  "name": "Nano Tutor",
-  "displayName": "Nano Tutor",
-  "version": "0.0.1",
+  "name": "YT Learn",
+  "displayName": "YT Learn",
+  "version": "1.0.0",
   "description": "Chat with youtube videos for free using built in Gemini Nano AI.",
   "author": "kevin castro weitgenant (kevin.weitgenant@gmail.com)",
   "scripts": {
