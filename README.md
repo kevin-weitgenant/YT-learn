@@ -10,7 +10,9 @@ Select specific chapters to focus on the parts you care about.
 
 ## Demo
 
-[![Watch the demo](https://img.youtube.com/vi/5KM-zwCP6eI/maxresdefault.jpg)](https://www.youtube.com/watch?v=5KM-zwCP6eI)
+https://github.com/user-attachments/assets/5b4d663f-c09c-4124-95bf-83e9b1195d51
+
+[Watch on YouTube](https://www.youtube.com/watch?v=5KM-zwCP6eI)
 
 ## Features
 
