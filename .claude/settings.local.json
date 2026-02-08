@@ -5,9 +5,15 @@
       "Bash(findstr:*)",
       "WebSearch",
       "Bash(npx tsc:*)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "mcp__chrome-devtools__take_snapshot",
+      "mcp__chrome-devtools__evaluate_script"
     ],
     "deny": [],
     "ask": []
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "chrome-devtools"
+  ]
 }
